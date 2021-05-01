@@ -19,7 +19,7 @@ You will find some sample scripts under `scripts` directory. To run the scripts 
 ```
 cd cloud-drive
 npm install
-node scripts\cloud-drive.js
+node scripts\storageQuota.js
 ```
 
 ## About master key file

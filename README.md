@@ -7,7 +7,7 @@ Note: Setup script would only run on `cloud shell`, after retriving masterKey fi
 
 1. Login to [Google Cloud Console](https://console.cloud.google.com/)
 2. Open `cloud shell`, see the below image.
-![step2: help image](https://telegra.ph/file/6e816134fae4f644258b7.png)
+![Step 2 help image](https://user-images.githubusercontent.com/21053902/116791360-5d9a0e80-aad7-11eb-8933-4f5c00885883.png)
 3. Clone this repo: `git clone https://github.com/Tilak999/cloud-drive.git`
 4. Run setup script: `cd cloud-drive && node main.js`
 5. Wait for script to finish (It would take 10-15 mins to finish)

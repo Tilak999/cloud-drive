@@ -1,5 +1,5 @@
 # cloud-drive
-Create pool cloud storage uisng multiple service account
+Create pool cloud storage using multiple service account
 
 ## Setup
 To run this setup you should have a google account.

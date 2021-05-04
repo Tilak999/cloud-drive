@@ -59,7 +59,7 @@ async function main(){
         }
         console.log(`> Service account created.. Done`)
 
-        mergeKeys(path(__dirname, 'keys'), path(__dirname,'masterKey.json'))
+        mergeKeys(path.join(__dirname, 'keys'), path.join(__dirname,'masterKey.json'))
         console.log(`> Find the master key present at:`, path(__dirname,'masterKey.json'))
 
     } catch (e){

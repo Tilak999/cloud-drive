@@ -19,6 +19,9 @@ function normaliseFileData(file) {
     }
     const metadata = (file.description) ? JSON.parse(file.description) : {} 
     
+    if(metadata['webViewLink']) 
+        metadata['webViewLink'] = metadata['webViewLink'].replace("view?usp=drivesdk","preview")
+    
     delete file.description
     delete file.size
     delete file.id
@@ -167,44 +170,53 @@ class GdriveFS {
         })
     }
 
-    async uploadFile($baseDir, $filePath, $forceReplace) {
-        const metadata = await this.getMetadataDirInfo()
-        const fileStat = fs.lstatSync($filePath)
-        const absPath = getAbsolutePath($baseDir)
-
+    async uploadFile($baseDir, $fileStream, $filename) {
+        if (!$fileStream || typeof $fileStream != 'object') 
+            throw "$fileStream:ReadStream - Readable file stream is required"
+        
+        if (!$filename||$filename.trim() == '') 
+            throw "$filename: Required"
+        
         if(!utils.isValidGfsPath($baseDir)) 
             throw "Invalid gfs:/.. path: " + $baseDir
+
+        const metadata = await this.getMetadataDirInfo()
+        const absPath = getAbsolutePath($baseDir)
         
-        if(fileStat.isDirectory()) 
-            throw "Path provided is directory, use uploadDirectory()."
-        
-        if(!fs.existsSync($filePath)) 
-            throw "Invalid file path, file not found: " + $filePath
-    
-        const file = await this.checkIfEntityExist(path.join(absPath, path.basename($filePath)), true)
+        const file = await this.checkIfEntityExist(path.join(absPath, $filename), true)
         if(file.exist) throw "File already exist: " + path.join($baseDir,path.basename($filePath))
 
         const parentDir = await this.checkIfEntityExist(absPath, true)
         if(!parentDir.exist || !parentDir.isDirectory) throw "Base directory doesn't exist: " + $baseDir
 
-        const fields = "mimeType, id, name, size, modifiedTime, hasThumbnail, iconLink, originalFilename, description"
+        const fields = "mimeType, id, name, size, modifiedTime, hasThumbnail, iconLink, originalFilename, description, webViewLink"
 
         for(const serviceAccountName of Object.keys(this._keyFile)){
             const serviceAccountAuth = this._keyFile[serviceAccountName]
-            const info = await this.getStorageInfo(serviceAccountAuth)
+            //const info = await this.getStorageInfo(serviceAccountAuth)
 
-            if(info.limit >= fileStat.size) {
+            //if(info.limit >= fileStat.size) {
                 const auth = await authorize(serviceAccountAuth)
+                
+                // create and upload actual file
                 const fileMetadata = {
-                    originalFilename: path.basename($filePath),
-                    name: path.join(absPath, path.basename($filePath))
+                    originalFilename: $filename,
+                    name: path.join(absPath, $filename),
                 }
                 const resp = await drive.files.create({
                     auth, fields,
-                    media: {
-                        body: fs.createReadStream($filePath)
-                    },
+                    media: { body: $fileStream },
                     resource: fileMetadata
+                })
+
+                // Add public permission
+                await drive.permissions.create({
+                    auth,
+                    fileId: resp.data.id,
+                    requestBody: {
+                        type: 'anyone',
+                        role: 'reader'
+                    }
                 })
 
                 // Create symbolic file in metadata directory
@@ -214,7 +226,8 @@ class GdriveFS {
                     description: JSON.stringify({
                         serviceAccountName, 
                         fileId: resp.data.id,
-                        fileSize: resp.data.size
+                        fileSize: resp.data.size,
+                        webViewLink: resp.data.webViewLink
                     }),
                     parents: [parentDir.data.symlinkId]
                 }
@@ -225,7 +238,7 @@ class GdriveFS {
                     status: GdriveFS.OK,
                     data: normaliseFileData(symlinkResp.data)
                 }
-            }
+            //}
         }
     }
 

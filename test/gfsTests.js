@@ -8,7 +8,7 @@ const gfs = new GdriveFS({
 })
 
 
-//gfs.list('gfs:/').then(console.log)
+//gfs.list('gfs:/', true).then(console.log)
 
 //gfs.createDirectory('gfs:/', 'movies').then(console.log)
 
@@ -24,12 +24,12 @@ async function test() {
 test()*/
 
 
-//gfs.uploadFile('gfs:/', '/home/trollvia_official/cloud-drive/package-lock.json').then(console.log)
+gfs.uploadFile('gfs:/', fs.createReadStream('/home/trollvia_official/cloud-drive/Falcon.avi'), 'falcon.mp4').then(console.log)
 
 
-gfs.downloadFile('gfs:/package-lock.json').then(resp=>{
+/*gfs.downloadFile('gfs:/package-lock.json').then(resp=>{
     resp.data.pipe(process.stdout)
-})
+})*/
  
 //gfs.getStorageInfo().then(console.log)
 

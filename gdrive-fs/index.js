@@ -19,12 +19,6 @@ function normaliseFileData(file) {
     };
     const metadata = file.description ? JSON.parse(file.description) : {};
 
-    if (metadata["webViewLink"])
-        metadata["webViewLink"] = metadata["webViewLink"].replace(
-            "view?usp=drivesdk",
-            "preview"
-        );
-
     delete file.description;
     delete file.size;
     delete file.id;
@@ -36,9 +30,10 @@ function getAbsolutePath(inputPath) {
     if (inputPath.indexOf(GFS_METADATA_ROOT_DIR) == -1) {
         return inputPath
             .replace(GFS_PREFIX, GFS_METADATA_ROOT_DIR)
+            .trim()
             .replace(/\/$/g, "");
     }
-    return inputPath.replace(/\/$/g, "");
+    return inputPath.trim().replace(/\/$/g, "");
 }
 
 class GdriveFS {
@@ -100,13 +95,13 @@ class GdriveFS {
             q: `name='${absPath}'`,
         });
         const files = resp.data.files;
-        const directoryId = files[0].id;
-
-        if (
-            files.length > 0 &&
-            files[0].mimeType == MIME_TYPE_DIRECTORY &&
-            $listDirectoryContents
-        ) {
+        
+        if(files.length == 0) {
+            return {
+                status: GdriveFS.NOT_FOUND
+            }
+        } else if (files[0].mimeType == MIME_TYPE_DIRECTORY && $listDirectoryContents) {
+            const directoryId = files[0].id;
             const folderContentsResp = await drive.files.list({
                 auth,
                 fields,
@@ -128,28 +123,32 @@ class GdriveFS {
             throw "Invalid gfs:/.. path: " + $path;
         const absPath = getAbsolutePath($path);
         const auth = await authorize(this._keyFile[this._indexDrive]);
-        const fields = `files(mimeType, id, name, size, modifiedTime, description)`;
+        const fields = `files(mimeType, id, name, size, modifiedTime, description, parents)`;
         const resp = await drive.files.list({
             auth,
             fields,
             q: `name='${absPath}'`,
         });
+        
+        const fileCount = resp.data.files.length;
         if ($includeData)
             return {
-                exist: resp.data.files.length > 0,
+                exist: fileCount > 0,
                 isDirectory:
-                    resp.data.files.length > 0
+                    fileCount > 0
                         ? resp.data.files[0].mimeType == MIME_TYPE_DIRECTORY
                         : null,
                 data:
-                    resp.data.files.length > 0
+                    fileCount > 0
                         ? normaliseFileData(resp.data.files[0])
                         : null,
             };
-        return resp.data.files.length > 0;
+        return fileCount > 0;
     }
 
     async createDirectory($baseDir, $dirName) {
+        if(!$baseDir || !$dirName) 
+            throw `Parameters required: ($baseDir, $dirName)`
         if (!utils.isValidGfsPath($baseDir))
             throw "Invalid gfs:/.. path: " + $baseDir;
 
@@ -164,15 +163,16 @@ class GdriveFS {
             path.parse(absPath).dir,
             true
         );
+
         if (!parentDir.exist || !parentDir.isDirectory)
-            throw "Parent directory doesn't exist: " + path.parse(absPath).dir;
+            throw "Parent directory doesn't exist: " + path.parse(path.join($baseDir, $dirName)).dir;
 
         if (!directoryExist) {
             const resource = {
                 originalFilename: $dirName,
                 name: absPath,
                 mimeType: MIME_TYPE_DIRECTORY,
-                parents: [parentDir.data.id || metadata.id],
+                parents: [parentDir.data.symlinkId || metadata.id],
             };
             const auth = await authorize(this._keyFile[this._indexDrive]);
             const resp = await drive.files.create({ auth, resource });
@@ -306,9 +306,7 @@ class GdriveFS {
         if (!utils.isValidGfsPath($filePath))
             throw "Invalid gfs:/.. path: " + $filePath;
 
-        const absPath = $filePath
-            .replace(GFS_PREFIX, GFS_METADATA_ROOT_DIR)
-            .replace(/\/$/g, "");
+        const absPath = getAbsolutePath($filePath)
         const result = await this.checkIfEntityExist(absPath, true);
 
         if (result.exist && !result.isDirectory) {
@@ -338,20 +336,29 @@ class GdriveFS {
         if (!utils.isValidGfsPath($filePath))
             throw "Invalid gfs:/.. path: " + $filePath;
 
-        const absPath = $filePath
-            .replace(GFS_PREFIX, GFS_METADATA_ROOT_DIR)
-            .replace(/\/$/g, "");
+        const absPath = getAbsolutePath($filePath)
+        if(absPath == GFS_METADATA_ROOT_DIR)
+            throw "Root directory can'be deleted"
 
         const result = await this.checkIfEntityExist(absPath, true);
-
         if (result.exist && result.isDirectory) {
             const resp = await this.list(absPath, true);
-            if (resp.files.length > 0 && !$force)
+            if (resp.files.length > 0 && !$force) {
                 return {
-                    status: DIRECTORY_NOT_EMPTY,
-                };
-
-            resp.files.map((file) => this.deleteFile(file.path));
+                    status: GdriveFS.DIRECTORY_NOT_EMPTY,
+                }
+            } else {
+                // recursively delete files
+                const promises = resp.files.map(async(file)=>{
+                    if (file.mimeType == MIME_TYPE_DIRECTORY) {
+                        await this.deleteDirectory(file.path, true)
+                        return 
+                    } else {
+                        return this.deleteFile(file.path)
+                    }
+                })
+                await Promise.all(promises)
+            }
             const auth = await authorize(this._keyFile[this._indexDrive]);
             const res = await drive.files.delete({
                 auth,
@@ -370,9 +377,7 @@ class GdriveFS {
         if (!utils.isValidGfsPath($filePath))
             throw "Invalid gfs:/.. path: " + $filePath;
 
-        const absPath = $filePath
-            .replace(GFS_PREFIX, GFS_METADATA_ROOT_DIR)
-            .replace(/\/$/g, "");
+        const absPath = getAbsolutePath($filePath)
         const result = await this.checkIfEntityExist(absPath, true);
 
         if (result.exist && !result.isDirectory) {
@@ -390,6 +395,41 @@ class GdriveFS {
             return {
                 status: GdriveFS.NOT_FOUND,
             };
+        }
+    }
+
+
+    async move($source, $target){
+        if(!$source || !$target) 
+            throw "Parameters required ($source, $target)"
+        if (!utils.isValidGfsPath($source) || !utils.isValidGfsPath($target))
+            throw `Invalid gfs:/.. path: [${$source},${$target}]`;
+        if ($source == $target)
+            throw `Source and target can't be same: [${$source},${$target}]`;
+        if ($target.indexOf(path.join($source, '/')) > -1)
+            throw `Illegal operation: Source [${$source}] is parent of target [${$target}]`;
+
+        const sourceEntity = await this.checkIfEntityExist($source, true)
+        const destinationEntity = await this.checkIfEntityExist($target, true)
+
+        if(destinationEntity.exist && destinationEntity.isDirectory && sourceEntity.exist) {
+            const auth = await authorize(this._keyFile[this._indexDrive]);
+            const input = {
+                name: path.join(getAbsolutePath($target), path.basename($source))
+            }
+            const resp = await drive.files.update({
+                auth, 
+                removeParents: sourceEntity.data.parents,
+                addParents: [destinationEntity.data.symlinkId],
+                fileId: sourceEntity.data.symlinkId,
+                resource: input
+            })
+            return resp.data;
+        } else {
+            return {
+                status: GdriveFS.NOT_FOUND,
+                message: "Destination path is either invalid or not a directory."
+            }
         }
     }
 

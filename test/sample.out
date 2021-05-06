@@ -25,11 +25,11 @@ async function main() {
     resp.data.pipe(streamOut);
     if (resp.status != GdriveFS.OK) throw "Directory creation failed";
 
-    //console.log("delete file:");
-    //resp = await gfs.deleteFile("gfs:/test/sample.js");
-    //console.log(resp);
-    //if (resp.status != GdriveFS.OK) throw "File deletion failed";
-
+    console.log("delete file:");
+    resp = await gfs.deleteFile("gfs:/test/sample.js");
+    console.log(resp);
+    if (resp.status != GdriveFS.OK) throw "File deletion failed";
+    
     console.log("delete directory:");
     resp = await gfs.deleteDirectory("gfs:/test");
     console.log(resp);
@@ -37,6 +37,20 @@ async function main() {
 }
 
 main();
+
+/*
+gfs.createDirectory("gfs:/","hello").then(async()=>{
+    console.log(await gfs.createDirectory("gfs:/hello","world"))
+
+    const streamIn = fs.createReadStream(__dirname + "/gfsTests.js");
+    resp = await gfs.uploadFile("gfs:/hello/world", streamIn, "sample.js");
+
+    console.log(await gfs.list("gfs:/hello", true))
+})*/
+
+
+//gfs.list("gfs:/", true).then(console.log)
+//gfs.deleteDirectory("gfs:/hello", true).then(console.log)
 
 //gfs._listAllFiles().then(console.log);
 //gfs._deleteAllFiles().then(console.log);

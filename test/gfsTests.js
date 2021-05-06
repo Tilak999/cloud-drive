@@ -1,5 +1,6 @@
 const GdriveFS = require("../gdrive-fs");
 const fs = require("fs");
+const path = require("path")
 
 const gfs = new GdriveFS({
     keyFile: require("../masterKey.json"),
@@ -8,7 +9,6 @@ const gfs = new GdriveFS({
 });
 
 async function main() {
-    /*
     console.log("Create directory:");
     let resp = await gfs.createDirectory("gfs:/", "test");
     console.log(resp);
@@ -26,18 +26,34 @@ async function main() {
     resp.data.pipe(streamOut);
     if (resp.status != GdriveFS.OK) throw "Directory creation failed";
 
-    //console.log("delete file:");
-    //resp = await gfs.deleteFile("gfs:/test/sample.js");
-    //console.log(resp);
-    //if (resp.status != GdriveFS.OK) throw "File deletion failed";
-    */
+    console.log("delete file:");
+    resp = await gfs.deleteFile("gfs:/test/sample.js");
+    console.log(resp);
+    if (resp.status != GdriveFS.OK) throw "File deletion failed";
+    
     console.log("delete directory:");
     resp = await gfs.deleteDirectory("gfs:/test");
     console.log(resp);
     if (resp.status != GdriveFS.OK) throw "Directory deletion failed";
 }
 
-main();
+//main();
+
+/*
+gfs.createDirectory("gfs:/","hello").then(async()=>{
+    console.log(await gfs.createDirectory("gfs:/hello","world"))
+    //await gfs.move("gfs:/hello", "gfs:/hello")
+})*/
+
+
+gfs.list("gfs:/", true).then(console.log)
+
+//gfs.deleteDirectory("gfs:/", true).then(console.log)
+//gfs.createDirectory("gfs:/hello", 'sample');
+
+//gfs.move("gfs:/hello/world", "gfs:/").then(console.log)
+
+//console.log(path.join("gfs:/home",'/'))
 
 //gfs._listAllFiles().then(console.log);
 //gfs._deleteAllFiles().then(console.log);

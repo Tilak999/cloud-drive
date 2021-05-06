@@ -8,7 +8,6 @@ const gfs = new GdriveFS({
 });
 
 async function main() {
-    /*
     console.log("Create directory:");
     let resp = await gfs.createDirectory("gfs:/", "test");
     console.log(resp);
@@ -30,7 +29,7 @@ async function main() {
     //resp = await gfs.deleteFile("gfs:/test/sample.js");
     //console.log(resp);
     //if (resp.status != GdriveFS.OK) throw "File deletion failed";
-    */
+
     console.log("delete directory:");
     resp = await gfs.deleteDirectory("gfs:/test");
     console.log(resp);

@@ -95,12 +95,15 @@ class GdriveFS {
             q: `name='${absPath}'`,
         });
         const files = resp.data.files;
-        
-        if(files.length == 0) {
+
+        if (files.length == 0) {
             return {
-                status: GdriveFS.NOT_FOUND
-            }
-        } else if (files[0].mimeType == MIME_TYPE_DIRECTORY && $listDirectoryContents) {
+                status: GdriveFS.NOT_FOUND,
+            };
+        } else if (
+            files[0].mimeType == MIME_TYPE_DIRECTORY &&
+            $listDirectoryContents
+        ) {
             const directoryId = files[0].id;
             const folderContentsResp = await drive.files.list({
                 auth,
@@ -114,7 +117,7 @@ class GdriveFS {
         }
         return {
             status: GdriveFS.OK,
-            files: resp.data.files.map(normaliseFileData),
+            files: [normaliseFileData(resp.data.files[0])]
         };
     }
 
@@ -129,7 +132,7 @@ class GdriveFS {
             fields,
             q: `name='${absPath}'`,
         });
-        
+
         const fileCount = resp.data.files.length;
         if ($includeData)
             return {
@@ -147,8 +150,8 @@ class GdriveFS {
     }
 
     async createDirectory($baseDir, $dirName) {
-        if(!$baseDir || !$dirName) 
-            throw `Parameters required: ($baseDir, $dirName)`
+        if (!$baseDir || !$dirName)
+            throw `Parameters required: ($baseDir, $dirName)`;
         if (!utils.isValidGfsPath($baseDir))
             throw "Invalid gfs:/.. path: " + $baseDir;
 
@@ -165,7 +168,10 @@ class GdriveFS {
         );
 
         if (!parentDir.exist || !parentDir.isDirectory)
-            throw "Parent directory doesn't exist: " + path.parse(path.join($baseDir, $dirName)).dir;
+            throw (
+                "Parent directory doesn't exist: " +
+                path.parse(path.join($baseDir, $dirName)).dir
+            );
 
         if (!directoryExist) {
             const resource = {
@@ -223,7 +229,6 @@ class GdriveFS {
         if (!utils.isValidGfsPath($baseDir))
             throw "Invalid gfs:/.. path: " + $baseDir;
 
-        const metadata = await this.getMetadataDirInfo();
         const absPath = getAbsolutePath($baseDir);
 
         const file = await this.checkIfEntityExist(
@@ -232,10 +237,7 @@ class GdriveFS {
         );
 
         if (file.exist)
-            throw (
-                "File already exist: " +
-                path.join($baseDir, path.basename($filePath))
-            );
+            throw "File already exist: " + path.join($baseDir, $filename);
 
         const parentDir = await this.checkIfEntityExist(absPath, true);
         if (!parentDir.exist || !parentDir.isDirectory)
@@ -306,7 +308,7 @@ class GdriveFS {
         if (!utils.isValidGfsPath($filePath))
             throw "Invalid gfs:/.. path: " + $filePath;
 
-        const absPath = getAbsolutePath($filePath)
+        const absPath = getAbsolutePath($filePath);
         const result = await this.checkIfEntityExist(absPath, true);
 
         if (result.exist && !result.isDirectory) {
@@ -336,9 +338,9 @@ class GdriveFS {
         if (!utils.isValidGfsPath($filePath))
             throw "Invalid gfs:/.. path: " + $filePath;
 
-        const absPath = getAbsolutePath($filePath)
-        if(absPath == GFS_METADATA_ROOT_DIR)
-            throw "Root directory can'be deleted"
+        const absPath = getAbsolutePath($filePath);
+        if (absPath == GFS_METADATA_ROOT_DIR)
+            throw "Root directory can'be deleted";
 
         const result = await this.checkIfEntityExist(absPath, true);
         if (result.exist && result.isDirectory) {
@@ -346,21 +348,21 @@ class GdriveFS {
             if (resp.files.length > 0 && !$force) {
                 return {
                     status: GdriveFS.DIRECTORY_NOT_EMPTY,
-                }
+                };
             } else {
                 // recursively delete files
-                const promises = resp.files.map(async(file)=>{
+                const promises = resp.files.map(async (file) => {
                     if (file.mimeType == MIME_TYPE_DIRECTORY) {
-                        await this.deleteDirectory(file.path, true)
-                        return 
+                        await this.deleteDirectory(file.path, true);
+                        return;
                     } else {
-                        return this.deleteFile(file.path)
+                        return this.deleteFile(file.path);
                     }
-                })
-                await Promise.all(promises)
+                });
+                await Promise.all(promises);
             }
             const auth = await authorize(this._keyFile[this._indexDrive]);
-            const res = await drive.files.delete({
+            await drive.files.delete({
                 auth,
                 fileId: result.data.symlinkId,
             });
@@ -377,7 +379,7 @@ class GdriveFS {
         if (!utils.isValidGfsPath($filePath))
             throw "Invalid gfs:/.. path: " + $filePath;
 
-        const absPath = getAbsolutePath($filePath)
+        const absPath = getAbsolutePath($filePath);
         const result = await this.checkIfEntityExist(absPath, true);
 
         if (result.exist && !result.isDirectory) {
@@ -398,38 +400,45 @@ class GdriveFS {
         }
     }
 
-
-    async move($source, $target){
-        if(!$source || !$target) 
-            throw "Parameters required ($source, $target)"
+    async move($source, $target) {
+        if (!$source || !$target)
+            throw "Parameters required ($source, $target)";
         if (!utils.isValidGfsPath($source) || !utils.isValidGfsPath($target))
             throw `Invalid gfs:/.. path: [${$source},${$target}]`;
         if ($source == $target)
             throw `Source and target can't be same: [${$source},${$target}]`;
-        if ($target.indexOf(path.join($source, '/')) > -1)
+        if ($target.indexOf(path.join($source, "/")) > -1)
             throw `Illegal operation: Source [${$source}] is parent of target [${$target}]`;
 
-        const sourceEntity = await this.checkIfEntityExist($source, true)
-        const destinationEntity = await this.checkIfEntityExist($target, true)
+        const sourceEntity = await this.checkIfEntityExist($source, true);
+        const destinationEntity = await this.checkIfEntityExist($target, true);
 
-        if(destinationEntity.exist && destinationEntity.isDirectory && sourceEntity.exist) {
+        if (
+            destinationEntity.exist &&
+            destinationEntity.isDirectory &&
+            sourceEntity.exist
+        ) {
             const auth = await authorize(this._keyFile[this._indexDrive]);
             const input = {
-                name: path.join(getAbsolutePath($target), path.basename($source))
-            }
+                name: path.join(
+                    getAbsolutePath($target),
+                    path.basename($source)
+                ),
+            };
             const resp = await drive.files.update({
-                auth, 
+                auth,
                 removeParents: sourceEntity.data.parents,
                 addParents: [destinationEntity.data.symlinkId],
                 fileId: sourceEntity.data.symlinkId,
-                resource: input
-            })
+                resource: input,
+            });
             return resp.data;
         } else {
             return {
                 status: GdriveFS.NOT_FOUND,
-                message: "Destination path is either invalid or not a directory."
-            }
+                message:
+                    "Destination path is either invalid or not a directory.",
+            };
         }
     }
 

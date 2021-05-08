@@ -22,5 +22,9 @@ npm install
 node scripts\storageQuota.js
 ```
 
+## CLI Tool
+We also have a CLI tool called gfs - for interacting with the pooled cloud storage.
+[See CLI usage](/gfs-cli)
+
 ## About master key file
 The master key file is nothing but collection of all the service account keys. Inside the json each service account key is mapped to corresponding service account file name. If you need to get the service account key files then they are present under `keys` directory.

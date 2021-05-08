@@ -27,13 +27,16 @@ function main() {
 
     const gfs = new GdriveFS({
         keyFile: require(keyFilePath),
-        indexDrive: "svcaccnt-0",
+        indexDrive: Object.keys(require(keyFilePath))[0],
     });
 
     program
         .command("ls <source>")
         .description("List all the files at the give path.")
-        .action((source) => require("./core/ls")(gfs, source, debug));
+        .option("-w, --weblink", "Get web link for the file")
+        .action((source, option) =>
+            require("./core/ls")(gfs, source, option, debug)
+        );
 
     program
         .command("mkdir <source> <dirName>")
@@ -57,10 +60,11 @@ function main() {
         );
 
     program
-        .command("rm <path> [forceDelete]")
+        .command("rm <path>")
         .description("Remove file/directory from <path>")
-        .action((path, forceDelete) =>
-            require("./core/rm")(gfs, path, forceDelete, debug)
+        .option("-r, --recursive", "Recursively delete file and directory.")
+        .action((path, option) =>
+            require("./core/rm")(gfs, path, option, debug)
         );
 
     program

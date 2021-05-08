@@ -2,13 +2,21 @@ const GdriveFS = require("../../gdrive-fs");
 const utils = require("../../lib/utils");
 const ora = require("ora");
 
-module.exports = async function (gfs, source, debug) {
+module.exports = async function (gfs, source, option, debug) {
     debug && console.log(">>", "Fetching files for path ", source);
 
     if (!utils.isValidGfsPath(source))
         return console.error(
             "error: Invalid source path, must start with gfs:/"
         );
+
+    if (option.weblink) {
+        const spinner = ora("Fetching..").start();
+        const { status, files } = await gfs.list(source);
+        if (status == GdriveFS.OK && files[0]["webViewLink"])
+            return spinner.succeed(files[0]["webViewLink"]);
+        else return spinner.fail(`Invalid file path.`);
+    }
 
     const spinner = ora("Fetching..").start();
     const { status, files } = await gfs.list(source, true);

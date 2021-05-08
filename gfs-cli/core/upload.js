@@ -23,7 +23,8 @@ async function uploadDirectory(gfs, source, destination, debug) {
                 isDirectory,
             };
         });
-        entities.forEach(async (entity) => {
+
+        for (entity of entities) {
             if (entity.isDirectory)
                 await uploadDirectory(
                     gfs,
@@ -33,7 +34,7 @@ async function uploadDirectory(gfs, source, destination, debug) {
                 );
             else
                 await uploadFile(gfs, entity.source, entity.destination, debug);
-        });
+        }
     } else {
         spinner.fail(`Error: ` + resp.status.replace("entity", "Directory"));
     }
@@ -44,24 +45,18 @@ async function uploadFile(gfs, source, destination, debug) {
     const filename = path.basename(source);
     const stat = fs.statSync(source);
 
-    spinner.start("[Uploading]" + filename);
-    const resp = await gfs.uploadFile(
-        destination,
-        fs.createReadStream(source),
-        {
-            filename: filename,
-            filesize: stat.size,
-            onUploadProgress: (e) => {
-                const uploaded = parseInt(e.bytesRead.toString());
-                const percentage = ((uploaded / stat.size) * 100).toFixed(2);
-                spinner.text = `[Progress: ${percentage}%] ${filename}`;
-            },
-        }
-    );
-
-    spinner.stopAndPersist({
-        text: `File uploaded: ${source} to ${path.join(destination, filename)}`,
-        symbol: "✔ ",
+    spinner.start("[Uploading] " + filename);
+    await gfs.uploadFile(destination, fs.createReadStream(source), {
+        filename: filename,
+        filesize: stat.size,
+        onUploadProgress: (e) => {
+            const uploaded = parseInt(e.bytesRead.toString());
+            const percentage = ((uploaded / stat.size) * 100).toFixed(2);
+            spinner.text = `[Progress: ${percentage}%] ${filename}`;
+            if (uploaded == stat.size) {
+                spinner.stopAndPersist({ symbol: "✔ " });
+            }
+        },
     });
 }
 
@@ -82,7 +77,7 @@ module.exports = async function (gfs, source, destination, debug) {
 
     spinner.start();
     try {
-        if (fs.lstatSync(source).isDirectory()) {
+        if (fs.statSync(source).isDirectory()) {
             await uploadDirectory(gfs, source, destination, debug);
         } else {
             await uploadFile(gfs, source, destination, debug);

@@ -29,15 +29,23 @@ async function downloadDirectory(gfs, source, destination, debug) {
 
 async function downloadFile(gfs, source, destination, debug) {
     debug && console.log("> Downloading file.. ", source);
-    spinner.start(`Downloading File: ${source} to ${destination}`);
     const filename = path.basename(source);
     const filepath = path.join(destination, filename);
-    const stream = fs.createWriteStream(filepath);
+
+    spinner.start(`[Downloading] ${filename}`);
     const result = await gfs.downloadFile(source);
-    result.data.pipe(stream);
-    spinner.stopAndPersist({
-        text: `Downloaded: ${source} to ${destination}`,
-        symbol: "✔ ",
+
+    const stream = fs.createWriteStream(filepath);
+    let receivedLength = 0;
+    result.data.on("data", (chunk) => {
+        stream.write(chunk);
+        receivedLength += chunk.length;
+        const percentage = ((receivedLength / result.length) * 100).toFixed(2);
+        spinner.text = `[Progress ${percentage}%] ${filename}`;
+    });
+    result.data.on("end", () => {
+        spinner.stopAndPersist({ symbol: "✔ " });
+        stream.end();
     });
 }
 
@@ -48,7 +56,7 @@ module.exports = async function (gfs, source, destination, debug) {
         );
 
     destination = path.resolve(destination);
-    if (!fs.lstatSync(destination).isDirectory())
+    if (!fs.statSync(destination).isDirectory())
         return console.error(
             "error: Destination should be valid local directory path."
         );

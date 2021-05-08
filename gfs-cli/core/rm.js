@@ -2,7 +2,7 @@ const GdriveFS = require("../../gdrive-fs");
 const utils = require("../../lib/utils");
 const ora = require("ora");
 
-module.exports = async function (gfs, path, forceDelete, debug) {
+module.exports = async function (gfs, path, option, debug) {
     debug && console.log(">>", "Removing file/directory ", path);
 
     if (!utils.isValidGfsPath(path))
@@ -14,9 +14,9 @@ module.exports = async function (gfs, path, forceDelete, debug) {
     const resp = await gfs.list(path);
 
     if (resp.status == GdriveFS.OK && resp.files.length > 0) {
-        if (forceDelete != "true" && resp.files[0].isDirectory) {
+        if (!option.recursive && resp.files[0].isDirectory) {
             return spinner.info(
-                "Provided path is a directory, use forceDelete = true"
+                "Provided path is a directory, pass -r or --recursive to delete."
             );
         }
         if (resp.files[0].isDirectory) {

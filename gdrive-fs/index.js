@@ -263,7 +263,10 @@ class GdriveFS {
                 // create and upload actual file
                 const fileMetadata = {
                     originalFilename: filename,
-                    name: path.join(absPath, filename),
+                    name: filename,
+                    description: JSON.stringify({
+                        path: path.join(absPath, filename),
+                    }),
                 };
                 const resp = await drive.files.create(
                     {
@@ -289,7 +292,8 @@ class GdriveFS {
 
                 // Create symbolic file in metadata directory
                 const resource = {
-                    ...fileMetadata,
+                    originalFilename: filename,
+                    name: path.join(absPath, filename),
                     mimeType: MIME_TYPE_LINK,
                     description: JSON.stringify({
                         serviceAccountName,
@@ -403,6 +407,7 @@ class GdriveFS {
             );
             return {
                 status: GdriveFS.OK,
+                length: parseInt(resp.headers["content-length"]),
                 data: resp.data,
             };
         } else {

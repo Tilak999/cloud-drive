@@ -10,6 +10,15 @@ git clone https://github.com/Tilak999/cloud-drive.git
 
 # install cli as global tool
 npm install -g .
+```
+
+CLI will look for masterKey.json at `~/.gfs` directory, if not found it will check if `GFS_KEY_FILE` variable is set and pointing to masterKey.json file in current shell environment or not.
+
+```sh
+
+# create key file directory
+mkdir ~/.gfs
+mv ./masterKey.json ~/.gfs
 
 ```
 

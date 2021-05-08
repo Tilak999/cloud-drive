@@ -41,14 +41,22 @@ async function uploadDirectory(gfs, source, destination, debug) {
 
 async function uploadFile(gfs, source, destination, debug) {
     debug && console.log("uploading file:", source);
-    spinner.start("Uploading: " + source);
     const filename = path.basename(source);
     const stat = fs.statSync(source);
+
+    spinner.start("[Uploading]" + filename);
     const resp = await gfs.uploadFile(
         destination,
         fs.createReadStream(source),
-        filename,
-        stat.size
+        {
+            filename: filename,
+            filesize: stat.size,
+            onUploadProgress: (e) => {
+                const uploaded = parseInt(e.bytesRead.toString());
+                const percentage = ((uploaded / stat.size) * 100).toFixed(2);
+                spinner.text = `[Progress: ${percentage}%] ${filename}`;
+            },
+        }
     );
 
     spinner.stopAndPersist({

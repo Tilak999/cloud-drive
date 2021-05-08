@@ -220,11 +220,18 @@ class GdriveFS {
         });
     }
 
-    async uploadFile($baseDir, $fileStream, $filename, $filesize) {
+    async uploadFile(
+        $baseDir,
+        $fileStream,
+        { filename, filesize, onUploadProgress }
+    ) {
         if (!$fileStream || typeof $fileStream != "object")
             throw "$fileStream:ReadStream - Readable file stream is required";
 
-        if (!$filename || $filename.trim() == "") throw "$filename: Required";
+        if (!filename || filename.trim() == "") throw "filename: Required";
+
+        if (!filesize || typeof filesize != "number")
+            throw "filesize: Required";
 
         if (!utils.isValidGfsPath($baseDir))
             throw "Invalid gfs:/.. path: " + $baseDir;
@@ -232,12 +239,12 @@ class GdriveFS {
         const absPath = getAbsolutePath($baseDir);
 
         const file = await this.checkIfEntityExist(
-            path.join(absPath, $filename),
+            path.join(absPath, filename),
             true
         );
 
         if (file.exist)
-            throw "File already exist: " + path.join($baseDir, $filename);
+            throw "File already exist: " + path.join($baseDir, filename);
 
         const parentDir = await this.checkIfEntityExist(absPath, true);
         if (!parentDir.exist || !parentDir.isDirectory)
@@ -250,20 +257,25 @@ class GdriveFS {
             const serviceAccountAuth = this._keyFile[serviceAccountName];
             const info = await this.getStorageInfo(serviceAccountAuth);
 
-            if (info.limit >= $filesize) {
+            if (info.limit >= filesize) {
                 const auth = await authorize(serviceAccountAuth);
 
                 // create and upload actual file
                 const fileMetadata = {
-                    originalFilename: $filename,
-                    name: path.join(absPath, $filename),
+                    originalFilename: filename,
+                    name: path.join(absPath, filename),
                 };
-                const resp = await drive.files.create({
-                    auth,
-                    fields,
-                    media: { body: $fileStream },
-                    resource: fileMetadata,
-                });
+                const resp = await drive.files.create(
+                    {
+                        auth,
+                        fields,
+                        media: { body: $fileStream },
+                        resource: fileMetadata,
+                    },
+                    {
+                        onUploadProgress,
+                    }
+                );
 
                 // Add public permission
                 await drive.permissions.create({

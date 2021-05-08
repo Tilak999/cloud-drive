@@ -33,14 +33,14 @@ Options:
   -h, --help                       display help for command
 
 Commands:
-  ls <source>                      List all the files at the give path.
+  ls [options] <source>            List all the files at the give path.
   mkdir <source> <dirName>         Create new directory at <source> with provided name.
   upload <source> <destination>    Upload file/directory to <source> path.
   download <source> <destination>  Download file from gfs to local system.
-  rm <path> [forceDelete]          Remove file/directory from <path>
+  rm [options] <path>              Remove file/directory from <path>
   storage [list]                   Get storage information.
   help [command]                   display help for command
-  ```
+```
 
 ## List files
 
@@ -53,6 +53,12 @@ List all the files and directories in `music`
 
 ```sh
 gfs ls gfs:/music
+```
+
+Get Web link of the file
+
+```sh
+gfs ls --weblink gfs:/music/sample.mp3
 ```
 
 ## Create directory
@@ -99,7 +105,7 @@ For deleting directory, second arg should be `true`
 
 ```sh
 # Download complete `music` directory at root
-gfs rm gfs:/music true
+gfs rm -r gfs:/music
 ```
 
 ## Get storage information

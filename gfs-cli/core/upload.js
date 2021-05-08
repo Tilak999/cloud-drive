@@ -23,7 +23,7 @@ async function uploadDirectory(gfs, source, destination, debug) {
                 isDirectory,
             };
         });
-        entities.forEach(async(entity) => {
+        entities.forEach(async (entity) => {
             if (entity.isDirectory)
                 await uploadDirectory(
                     gfs,
@@ -43,16 +43,18 @@ async function uploadFile(gfs, source, destination, debug) {
     debug && console.log("uploading file:", source);
     spinner.start("Uploading: " + source);
     const filename = path.basename(source);
+    const stat = fs.statSync(source);
     const resp = await gfs.uploadFile(
         destination,
         fs.createReadStream(source),
-        filename
+        filename,
+        stat.size
     );
-    
+
     spinner.stopAndPersist({
         text: `File uploaded: ${source} to ${path.join(destination, filename)}`,
         symbol: "✔ ",
-    })
+    });
 }
 
 module.exports = async function (gfs, source, destination, debug) {

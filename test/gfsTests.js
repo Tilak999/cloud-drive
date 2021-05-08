@@ -1,6 +1,6 @@
 const GdriveFS = require("../gdrive-fs");
 const fs = require("fs");
-const path = require("path")
+const path = require("path");
 
 const gfs = new GdriveFS({
     keyFile: require("../masterKey.json"),
@@ -30,7 +30,7 @@ async function main() {
     resp = await gfs.deleteFile("gfs:/test/sample.js");
     console.log(resp);
     if (resp.status != GdriveFS.OK) throw "File deletion failed";
-    
+
     console.log("delete directory:");
     resp = await gfs.deleteDirectory("gfs:/test");
     console.log(resp);
@@ -45,8 +45,7 @@ gfs.createDirectory("gfs:/","hello").then(async()=>{
     //await gfs.move("gfs:/hello", "gfs:/hello")
 })*/
 
-
-gfs.list("gfs:/", true).then(console.log)
+gfs.list("gfs:/", true).then(console.log);
 
 //gfs.deleteDirectory("gfs:/", true).then(console.log)
 //gfs.createDirectory("gfs:/hello", 'sample');

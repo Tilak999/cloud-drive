@@ -117,7 +117,7 @@ class GdriveFS {
         }
         return {
             status: GdriveFS.OK,
-            files: [normaliseFileData(resp.data.files[0])]
+            files: [normaliseFileData(resp.data.files[0])],
         };
     }
 
@@ -220,7 +220,7 @@ class GdriveFS {
         });
     }
 
-    async uploadFile($baseDir, $fileStream, $filename) {
+    async uploadFile($baseDir, $fileStream, $filename, $filesize) {
         if (!$fileStream || typeof $fileStream != "object")
             throw "$fileStream:ReadStream - Readable file stream is required";
 
@@ -248,59 +248,59 @@ class GdriveFS {
 
         for (const serviceAccountName of Object.keys(this._keyFile)) {
             const serviceAccountAuth = this._keyFile[serviceAccountName];
-            //const info = await this.getStorageInfo(serviceAccountAuth)
+            const info = await this.getStorageInfo(serviceAccountAuth);
 
-            //if(info.limit >= fileStat.size) {
-            const auth = await authorize(serviceAccountAuth);
+            if (info.limit >= $filesize) {
+                const auth = await authorize(serviceAccountAuth);
 
-            // create and upload actual file
-            const fileMetadata = {
-                originalFilename: $filename,
-                name: path.join(absPath, $filename),
-            };
-            const resp = await drive.files.create({
-                auth,
-                fields,
-                media: { body: $fileStream },
-                resource: fileMetadata,
-            });
+                // create and upload actual file
+                const fileMetadata = {
+                    originalFilename: $filename,
+                    name: path.join(absPath, $filename),
+                };
+                const resp = await drive.files.create({
+                    auth,
+                    fields,
+                    media: { body: $fileStream },
+                    resource: fileMetadata,
+                });
 
-            // Add public permission
-            await drive.permissions.create({
-                auth,
-                fileId: resp.data.id,
-                requestBody: {
-                    type: "anyone",
-                    role: "reader",
-                },
-            });
-
-            // Create symbolic file in metadata directory
-            const resource = {
-                ...fileMetadata,
-                mimeType: MIME_TYPE_LINK,
-                description: JSON.stringify({
-                    serviceAccountName,
+                // Add public permission
+                await drive.permissions.create({
+                    auth,
                     fileId: resp.data.id,
-                    fileSize: resp.data.size,
-                    webViewLink: resp.data.webViewLink,
-                }),
-                parents: [parentDir.data.symlinkId],
-            };
-            const indexDriveAuth = await authorize(
-                this._keyFile[this._indexDrive]
-            );
-            const symlinkResp = await drive.files.create({
-                auth: indexDriveAuth,
-                resource,
-                fields,
-            });
+                    requestBody: {
+                        type: "anyone",
+                        role: "reader",
+                    },
+                });
 
-            return {
-                status: GdriveFS.OK,
-                data: normaliseFileData(symlinkResp.data),
-            };
-            //}
+                // Create symbolic file in metadata directory
+                const resource = {
+                    ...fileMetadata,
+                    mimeType: MIME_TYPE_LINK,
+                    description: JSON.stringify({
+                        serviceAccountName,
+                        fileId: resp.data.id,
+                        fileSize: resp.data.size,
+                        webViewLink: resp.data.webViewLink,
+                    }),
+                    parents: [parentDir.data.symlinkId],
+                };
+                const indexDriveAuth = await authorize(
+                    this._keyFile[this._indexDrive]
+                );
+                const symlinkResp = await drive.files.create({
+                    auth: indexDriveAuth,
+                    resource,
+                    fields,
+                });
+
+                return {
+                    status: GdriveFS.OK,
+                    data: normaliseFileData(symlinkResp.data),
+                };
+            }
         }
     }
 

@@ -1,0 +1,21 @@
+<div class="relative min-h-screen w-screen flex">
+  <!-- Side bar start -->
+  <div class="bg-gray-100 w-64 space-y-5 px-2 py-2">
+    <button
+      class="py-2 rounded-full w-full bg-gray-300 hover:bg-blue-500 hover:text-white"
+    >
+      Upload
+    </button>
+
+    <nav class="">
+      <a href="" class="block py-2 px-4 rounded hover:bg-gray-300"> Home </a>
+      <a href="" class="block py-2 px-4 rounded hover:bg-gray-300"> Setting</a>
+    </nav>
+  </div>
+  <!-- Side bar end -->
+  <!-- Main content start -->
+  <div class="p-10 flex-1">
+    <ng-content></ng-content>
+  </div>
+  <!-- Main content end -->
+</div>

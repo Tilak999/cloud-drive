@@ -1,0 +1,12 @@
+.data-card-full {
+  @apply m-4;
+}
+
+.data-card-full .icon {
+  @apply h-40 w-40;
+  background-image: url(../svgIcon/folder.svg);
+}
+
+.data-card-full .name {
+  @apply h-10 overflow-hidden text-center;
+}

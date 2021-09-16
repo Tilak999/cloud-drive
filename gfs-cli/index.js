@@ -25,10 +25,7 @@ function main() {
         debug && console.log("> Key File:", keyFilePath);
     }
 
-    const gfs = new GdriveFS({
-        keyFile: require(keyFilePath),
-        indexDrive: Object.keys(require(keyFilePath))[0],
-    });
+    const gfs = new GdriveFS({ keyFile: require(keyFilePath) });
 
     program
         .command("ls <source>")

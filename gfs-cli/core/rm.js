@@ -20,10 +20,12 @@ module.exports = async function (gfs, path, option, debug) {
             );
         }
         if (resp.files[0].isDirectory) {
-            await gfs.deleteDirectory(path, true);
+            try { await gfs.deleteDirectory(path, true); }
+            catch(e) { return spinner.fail("error: " + e)}
             spinner.succeed("Directory deleted: " + path);
         } else {
-            await gfs.deleteFile(path);
+            try { await gfs.deleteFile(path); }
+            catch(e) { return spinner.fail("error: " + e)}
             spinner.succeed("File deleted: " + path);
         }
     } else {

@@ -48,11 +48,11 @@ class GdriveFS {
     static NOT_FOUND = "entity not found";
     static DIRECTORY_NOT_EMPTY = "Directory is not Empty";
 
-    constructor({ keyFile, debug, indexDrive }) {
+    constructor({ keyFile, debug }) {
         if (!keyFile) throw "KeyFile is required";
-        this._keyFile = keyFile;
+        this._keyFile = keyFile["serviceAccounts"];
         this._debug = debug;
-        this._indexDrive = indexDrive;
+        this._indexDrive = keyFile["indexStoreKey"];
     }
 
     async getMetadataDirInfo() {

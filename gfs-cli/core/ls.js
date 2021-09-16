@@ -35,6 +35,8 @@ module.exports = async function (gfs, source, option, debug) {
         );
         console.log(table.toString());
         console.log(" Total Files: ", files.length, "\n");
+    } else if (status == GdriveFS.NOT_FOUND) {
+        console.log("Directory is Empty");
     } else {
         console.log("error:", status);
     }

@@ -39,7 +39,7 @@ class GdriveFS {
     // Private Fields
     _keyFile = null;
     _debug = false;
-    _indexDrive = null;
+    _indexAuth = null;
 
     // Constants
     static ALREADY_EXIST = "entity already exist";
@@ -47,11 +47,11 @@ class GdriveFS {
     static NOT_FOUND = "entity not found";
     static DIRECTORY_NOT_EMPTY = "Directory is not Empty";
 
-    constructor({ keyFile, debug }) {
-        if (!keyFile) throw "KeyFile is required";
-        this._keyFile = keyFile["serviceAccounts"];
+    constructor({ masterKeyFile, debug }) {
+        if (!masterKeyFile) throw "KeyFile is required";
+        this._keyFile = masterKeyFile["serviceAccounts"];
         this._debug = debug;
-        this._indexDrive = keyFile["indexStoreKey"];
+        this._indexAuth = this._keyFile[masterKeyFile["indexStoreKey"]];
         this.getIndexDirectory();
     }
 

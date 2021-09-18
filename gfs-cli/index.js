@@ -25,7 +25,7 @@ function main() {
         debug && console.log("> Key File:", keyFilePath);
     }
 
-    const gfs = new GdriveFS({ keyFile: require(keyFilePath) });
+    const gfs = new GdriveFS({ masterKeyFile: require(keyFilePath) });
 
     program
         .command("ls <source>")

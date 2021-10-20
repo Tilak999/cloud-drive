@@ -11,27 +11,32 @@
         <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css"
             rel="stylesheet"
-            integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU"
-            crossorigin="anonymous"
         />
         <script>
             document.addEventListener("alpine:init", () => {
+                window.pathHistory = [];
                 Alpine.store("loading", true);
-                Alpine.store("path", "gfs:/");
-                Alpine.store("prevPath", null);
-                axios.post("/list").then((resp) => {
-                    Alpine.store("loading", false);
-                    Alpine.store("files", resp.data.files);
-                });
+                getList("gfs:/");
             });
 
             function getList(path) {
-                Alpine.store("prevPath", Alpine.store("path"));
+                Alpine.store("loading", true);
                 axios.post("/list", { path }).then((resp) => {
                     Alpine.store("loading", false);
-                    Alpine.store("path", path);
                     Alpine.store("files", resp.data.files);
                 });
+            }
+
+            function gotoPage(path) {
+                if (path) window.pathHistory.push(path);
+                getList(path);
+            }
+
+            function gotoPrevPage() {
+                console.log("stack:" + window.pathHistory);
+                window.pathHistory.pop();
+                const path = window.pathHistory[window.pathHistory.length - 1];
+                getList(path);
             }
         </script>
     </head>
@@ -52,16 +57,32 @@
                 </div>
                 <template x-if="!$store.loading">
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Go Back</li>
+                        <template x-if="window.pathHistory.length > 0">
+                            <li class="list-group-item" @click="gotoPrevPage()">
+                                Go Back
+                            </li>
+                        </template>
                         <template x-for="file in $store.files">
                             <li class="list-group-item d-flex">
-                                <div
-                                    class="flex-grow-1"
-                                    @click="getList(file.path)"
-                                >
-                                    <img :src="file.iconLink" />
-                                    <span x-text="file.name"></span>
-                                </div>
+                                <template x-if="file.webViewLink">
+                                    <a
+                                        :href="file.webViewLink"
+                                        target="_blank"
+                                        class="flex-grow-1"
+                                    >
+                                        <img :src="file.iconLink" />
+                                        <span x-text="file.name"></span>
+                                    </a>
+                                </template>
+                                <template x-if="!file.webViewLink">
+                                    <div
+                                        class="flex-grow-1"
+                                        @click="gotoPage(file.path)"
+                                    >
+                                        <img :src="file.iconLink" />
+                                        <span x-text="file.name"></span>
+                                    </div>
+                                </template>
                                 <div class="mx-2">delete</div>
                                 <div
                                     data-bs-toggle="modal"
@@ -112,9 +133,5 @@
         </div>
         <!-- Modal-End -->
     </body>
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
-        crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
 </html>

@@ -4,6 +4,11 @@ export default function FileTree(props) {
     const getId = (i) => {
         return props.id == null ? i + "" : props.id + "," + i;
     };
+
+    const sendEvent = (mimeType, id) => {
+        mimeType.endsWith("folder") && props.onClick(id);
+    };
+
     return (
         <>
             {props.nodes && (
@@ -11,7 +16,7 @@ export default function FileTree(props) {
                     {props.nodes.map((node, i) => (
                         <li
                             key={i}
-                            className="overflow-hidden truncate w-full mt-2"
+                            className="whitespace-nowrap w-full mt-2"
                             title={node.name}
                         >
                             {node.mimeType.endsWith("folder") && (
@@ -20,18 +25,21 @@ export default function FileTree(props) {
                                 </span>
                             )}
                             {node.mimeType.endsWith("symlink") ? (
-                                <File className="inline-block align-sub mx-2 ml-3" />
+                                <File className="inline-block align-sub mx-2 ml-6" />
                             ) : (
                                 <Folder className="inline-block align-sub mx-2" />
                             )}
                             <span
+                                className="font-semibold"
                                 onClick={() =>
-                                    node.mimeType.endsWith("folder") &&
-                                    props.onClick(getId(i))
+                                    sendEvent(node.mimeType, getId(i))
                                 }
                             >
                                 {node.name}
                             </span>
+                            <div className="ml-5 text-sm text-green-500">
+                                {node.loading && "Loading.."}
+                            </div>
                             <FileTree
                                 {...props}
                                 nodes={node.childrens}

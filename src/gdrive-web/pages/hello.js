@@ -6,38 +6,47 @@ import { LeftArrow, MoveFile } from "../components/icons";
 
 function HomePage() {
     const [filetree, setFiletree] = useState([]);
+    const [currentView, setCurrentView] = useState([]);
 
     const fetchFiles = async (nodeId) => {
         if (filetree.length == 0 || nodeId == null) {
             const { data } = await axios.post("/api/listFiles");
             setFiletree(data.files);
+            setCurrentView(data.files);
         } else {
             const items = nodeId.split(",");
             let target = filetree;
             for (let i of items) {
                 target = target[i] || target.childrens[i];
             }
-            const { data } = await axios.post("/api/listFiles", {
-                path: target.path,
-            });
-            target["childrens"] = data.files;
-            setFiletree([...filetree]);
+            if (target.childrens != null) {
+                target["childrens"] = null;
+                setFiletree([...filetree]);
+            } else {
+                target["loading"] = true;
+                setFiletree([...filetree]);
+                const { data } = await axios.post("/api/listFiles", {
+                    path: target.path,
+                });
+                target["childrens"] = data.files;
+                target["loading"] = false;
+                setFiletree([...filetree]);
+                setCurrentView(data.files);
+            }
         }
     };
 
-    useEffect(async () => {
-        fetchFiles();
-    }, []);
+    useEffect(fetchFiles, []);
 
     return (
         <div className="w-full h-screen bg-gray-50 flex flex-col">
             <Header title="GDrive" />
             <div className="flex flex-row flex-1">
-                <div className="w-72 bg-white shadow-sm">
-                    <div className="bg-green-600 text-white px-2 py-1 text-sm">
+                <div className="w-72 bg-white shadow-sm flex flex-col">
+                    <div className="bg-green-600 text-white px-2 py-1">
                         File Tree
                     </div>
-                    <div className="pt-2 text-gray-700">
+                    <div className="pt-2 text-gray-600 overflow-auto flex-grow">
                         <FileTree nodes={filetree} onClick={fetchFiles} />
                     </div>
                 </div>
@@ -70,6 +79,7 @@ function HomePage() {
                                 </button>
                             </div>
                         </div>
+                        <div>{ currentView.map(file=><span></span>)}</div>
                     </div>
                 </div>
             </div>

@@ -416,18 +416,6 @@ class GdriveFS {
             throw "Invalid gfs:/.. path: " + filePath;
     }
 
-    async deleteBySymlinkId(id) {
-        const fields = `files(mimeType, id, name, size, modifiedTime, description, parents)`;
-        const auth = await authorize(this._indexAuth);
-        const resp = await drive.files.get({
-            auth,
-            fileId: id,
-            fields,
-        });
-        const dataFile = JSON.parse(resp.description);
-        //await drive.files.delete({ })
-    }
-
     async _listAllFiles() {
         const auth2 = await authorize(this._indexAuth);
         const res2 = await drive.files.list({ auth: auth2, fields: "*" });

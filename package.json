@@ -1,21 +1,33 @@
 {
-  "name": "cloud-drive",
-  "version": "1.0.0",
-  "description": "Cloud Storage using service account",
-  "main": "main.js",
-  "bin": {
-    "gfs": "./gfs-cli/index.js"
-  },
-  "scripts": {
-    "init": "node main.js"
-  },
-  "author": "Tilak999",
-  "dependencies": {
-    "cli-table": "^0.3.6",
-    "commander": "^7.2.0",
-    "express": "^4.17.1",
-    "googleapis": "^73.0.0",
-    "ora": "^5.4.0"
-  },
-  "license": "MIT"
+    "name": "cloud-drive",
+    "version": "1.0.0",
+    "description": "Cloud Storage using service account",
+    "main": "main.js",
+    "bin": {
+        "gfs": "./src/gfs-cli/index.js"
+    },
+    "scripts": {
+        "generateKey": "node ./src/generateMasterKey.js",
+        "dev": "next dev ./src/gdrive-web",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "author": "Tilak999",
+    "dependencies": {
+        "axios": "^0.24.0",
+        "cli-table": "^0.3.6",
+        "commander": "^7.2.0",
+        "googleapis": "^73.0.0",
+        "next": "^12.0.3",
+        "ora": "^5.4.0",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "autoprefixer": "^10.4.0",
+        "postcss": "^8.3.11",
+        "tailwindcss": "^2.2.19"
+    }
 }

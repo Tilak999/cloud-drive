@@ -69,11 +69,6 @@ function main() {
         .description("Get storage information.")
         .action((list) => require("./core/storage")(gfs, list, debug));
 
-    program
-        .command("webui")
-        .description("Launch local server to host webui")
-        .action(() => require("./core/webui")(gfs, debug));
-
     debug = ["-d", "--debug"].includes(process.argv[2]);
     program.parse(process.argv);
 }

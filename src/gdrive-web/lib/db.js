@@ -1,8 +1,11 @@
 import registerService from "./registerService";
 import { Pool } from "pg";
+const connectionString = process.env.DATABASE_URL;
 
-const connectionString =
-    "postgres://vlvxpaivcnvreh:67207d05c17035f9b107be1f380d52c482b64ea6c0b27497a1bbd1f63c76fdaf@ec2-184-73-243-101.compute-1.amazonaws.com:5432/dcun694n4gepd4";
+if (!connectionString) {
+    console.error("Database url is empty, set env variable 'DATABASE_URL'");
+    process.exit(1);
+}
 
 const pool = registerService("db", () => {
     const pool = new Pool({

@@ -80,7 +80,7 @@ export default function FileView({ directoryNode }) {
                         className="cursor-pointer p-2"
                         title="refresh view"
                     >
-                        <i class="bi bi-arrow-clockwise"></i>
+                        <i className="bi bi-arrow-clockwise"></i>
                     </button>
                     <CreateFolderAction
                         directoryPath={currentView.path}

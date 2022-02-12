@@ -1,4 +1,3 @@
-import { File, Folder } from "./icons";
 import Spinner from "./spinner";
 
 export default function FileTree(props) {

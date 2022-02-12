@@ -4,11 +4,13 @@ import { useRef, useState } from "react";
 import { validateEmail } from "../../lib/utils";
 import notify from "../lib/notify";
 
-export default function login() {
+export default function signup() {
+    const fileInput = useRef();
+    const [key, setKey] = useState({ name: null, text: null });
     const [message, setMessage] = useState();
     const router = useRouter();
 
-    const signin = (e) => {
+    const createKey = (e) => {
         e.preventDefault();
         setMessage();
         const email = e.target[0].value;
@@ -16,10 +18,11 @@ export default function login() {
         if (!email || !validateEmail(email))
             return setMessage("Invalid e-mail");
         if (!password) return setMessage("Password field can't be empty");
+        if (!key.text) return setMessage("KeyFile is not selected");
 
         const notif = notify().withLoading("Logging in");
         axios
-            .post("/api/signin", { email, password })
+            .post("/api/createMasterKey", { email, password, key })
             .then((res) => {
                 notif.success("Welcome..");
                 router.push("/dashboard");
@@ -30,17 +33,27 @@ export default function login() {
             });
     };
 
+    const onFileSelected = async () => {
+        const file = fileInput.current.files.item(0);
+        setKey({
+            name: file.name,
+            text: await file.text(),
+        });
+    };
+
     return (
         <div className="bg-gray-100 flex w-full h-screen">
             <div className="w-96 m-auto bg-white shadow-lg rounded-lg mt-28 py-6">
-                <h1 className="text-xl text-center p-2 my-3">Sign In</h1>
+                <h1 className="text-xl text-center p-2 my-3">
+                    Create credentials
+                </h1>
                 {message && (
                     <div className="bg-red-500 px-6 py-2 text-sm text-white">
                         <i className="bi bi-exclamation-triangle-fill mr-2"></i>
                         {message}
                     </div>
                 )}
-                <form className="w-full px-6 py-4" onSubmit={signin}>
+                <form className="w-full px-6 py-4" onSubmit={createKey}>
                     <div className="block text-gray-500 font-bold my-4">
                         Email
                     </div>
@@ -61,12 +74,25 @@ export default function login() {
                         placeholder="*******"
                     />
 
-                    <div className="text-center my-4">
+                    <button
+                        className="bg-gray-100 text-gray-600 text-center p-6 my-6 rounded inline-block w-full outline-dashed outline-slate-400"
+                        onClick={() => fileInput.current.click()}
+                    >
+                        {key.name || "Upload Key File"}
+                        <input
+                            type="file"
+                            className="hidden"
+                            ref={fileInput}
+                            onChange={onFileSelected}
+                        />
+                    </button>
+
+                    <div className="text-center">
                         <button
                             className="shadow bg-green-500 hover:bg-green-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
                             type="submit"
                         >
-                            Sign In
+                            Sign Up
                         </button>
                     </div>
                 </form>

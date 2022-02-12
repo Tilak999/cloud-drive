@@ -50,8 +50,8 @@ class GdriveFS {
     constructor({ masterKeyFile, debug }) {
         if (!masterKeyFile) throw "KeyFile is required";
         this._keyFile = masterKeyFile["serviceAccounts"];
-        this._debug = debug;
         this._indexAuth = this._keyFile[masterKeyFile["indexStoreKey"]];
+        this._debug = debug;
         this.getIndexDirectory();
     }
 
@@ -237,6 +237,8 @@ class GdriveFS {
             "mimeType, id, name, size, modifiedTime, hasThumbnail, iconLink, originalFilename, description, webViewLink";
 
         for (const serviceAccountName of Object.keys(this._keyFile)) {
+            if (this._indexAuth.client_email.startsWith(serviceAccountName))
+                continue;
             const serviceAccountAuth = this._keyFile[serviceAccountName];
             const info = await this.getStorageInfo(serviceAccountAuth);
             const freeSpace = info.limit - info.usage;
@@ -265,14 +267,14 @@ class GdriveFS {
                 );
 
                 // Add public permission
-                await drive.permissions.create({
+                /*await drive.permissions.create({
                     auth,
                     fileId: resp.data.id,
                     requestBody: {
                         type: "anyone",
                         role: "reader",
                     },
-                });
+                });*/
 
                 // Create symbolic file in metadata directory
                 const resource = {
@@ -281,6 +283,7 @@ class GdriveFS {
                     mimeType: MIME_TYPE_LINK,
                     description: JSON.stringify({
                         serviceAccountName,
+                        mimeType: resp.data.mimeType,
                         fileId: resp.data.id,
                         fileSize: resp.data.size,
                         webViewLink: resp.data.webViewLink,
@@ -419,7 +422,7 @@ class GdriveFS {
     async _listAllFiles() {
         const auth2 = await authorize(this._indexAuth);
         const res2 = await drive.files.list({ auth: auth2, fields: "*" });
-        console.log(JSON.stringify(res2.data, null, 4));
+        this._debug && console.log(JSON.stringify(res2.data, null, 4));
     }
 
     async _deleteAllFiles() {

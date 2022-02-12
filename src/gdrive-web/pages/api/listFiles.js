@@ -1,8 +1,11 @@
-import getGFS from "../../lib/setup-gfs";
+import Cookies from "cookies";
+import getGFS from "../../lib/Gdrive";
 
 export default async function listFiles(req, res) {
-    const gfs = getGFS(process.env.GFS_KEY_FILE);
-    const data = await gfs.list(req.body.path || "gfs:/", true);
+    const cookie = new Cookies(req, res);
+
+    const gfs = await getGFS(cookie.get("token"));
+    const data = await gfs.list(req.body?.path || "gfs:/", true);
 
     res.status(200).json({
         files: [

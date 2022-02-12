@@ -247,60 +247,64 @@ class GdriveFS {
                 const auth = await authorize(serviceAccountAuth);
 
                 // create and upload actual file
-                const fileMetadata = {
-                    originalFilename: filename,
-                    name: filename,
-                    description: JSON.stringify({
-                        path: path.join(absPath, filename),
-                    }),
-                };
                 const resp = await drive.files.create(
                     {
                         auth,
                         fields,
                         media: { body: $fileStream },
-                        resource: fileMetadata,
+                        resource: {
+                            originalFilename: filename,
+                            name: filename,
+                            description: JSON.stringify({
+                                path: path.join(absPath, filename),
+                            }),
+                        },
                     },
                     {
                         onUploadProgress,
                     }
                 );
 
-                // Add public permission
-                /*await drive.permissions.create({
-                    auth,
-                    fileId: resp.data.id,
-                    requestBody: {
-                        type: "anyone",
-                        role: "reader",
-                    },
-                });*/
+                if (resp.data == null || resp.data.id == null)
+                    throw "File upload failed";
 
-                // Create symbolic file in metadata directory
-                const resource = {
-                    originalFilename: filename,
-                    name: path.join(absPath, filename),
-                    mimeType: MIME_TYPE_LINK,
-                    description: JSON.stringify({
-                        serviceAccountName,
-                        mimeType: resp.data.mimeType,
-                        fileId: resp.data.id,
-                        fileSize: resp.data.size,
-                        webViewLink: resp.data.webViewLink,
-                    }),
-                    parents: [parentDir.data.symlinkId],
-                };
-                const indexDriveAuth = await authorize(this._indexAuth);
-                const symlinkResp = await drive.files.create({
-                    auth: indexDriveAuth,
-                    resource,
-                    fields,
-                });
+                try {
+                    // Create symbolic file in metadata directory
+                    const resource = {
+                        originalFilename: filename,
+                        name: path.join(absPath, filename),
+                        mimeType: MIME_TYPE_LINK,
+                        description: JSON.stringify({
+                            serviceAccountName,
+                            mimeType: resp.data.mimeType,
+                            iconLink: resp.data.iconLink,
+                            fileId: resp.data.id,
+                            fileSize: resp.data.size,
+                            webViewLink: resp.data.webViewLink,
+                        }),
+                        parents: [parentDir.data.symlinkId],
+                    };
+                    const indexDriveAuth = await authorize(this._indexAuth);
+                    const symlinkResp = await drive.files.create({
+                        auth: indexDriveAuth,
+                        resource,
+                        fields,
+                    });
 
-                return {
-                    status: GdriveFS.OK,
-                    data: normaliseFileData(symlinkResp.data),
-                };
+                    console.log($baseDir, parentDir.data.symlinkId);
+                    console.log(symlinkResp);
+                    return {
+                        status: GdriveFS.OK,
+                        data: normaliseFileData(symlinkResp.data),
+                    };
+                } catch (e) {
+                    this._debug && console.error(e);
+                    await this._deleteById(
+                        this._keyFile[serviceAccountName],
+                        resp.data.id
+                    );
+                    throw e;
+                }
             }
         }
     }

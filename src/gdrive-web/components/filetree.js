@@ -23,7 +23,7 @@ export default function FileTree(props) {
                             className="whitespace-nowrap w-full mt-2"
                             title={node.name}
                         >
-                            {node.mimeType.endsWith("folder") && (
+                            {node.mimeType.endsWith("folder") ? (
                                 <span
                                     className="mr-3 hover:text-green-600 hover:cursor-pointer"
                                     onClick={() =>
@@ -36,11 +36,8 @@ export default function FileTree(props) {
                                         <i className="bi bi-chevron-right" />
                                     )}
                                 </span>
-                            )}
-                            {node.mimeType.endsWith("symlink") ? (
-                                <i className="ml-7 bi bi-file-earmark-text"></i>
                             ) : (
-                                <i className="bi bi-folder2"></i>
+                                <i className="ml-7 bi bi-file-earmark-text"></i>
                             )}
                             <span
                                 className="mx-1 hover:text-green-600 hover:cursor-pointer"

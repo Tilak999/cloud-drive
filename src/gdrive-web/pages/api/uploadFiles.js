@@ -27,18 +27,23 @@ apiRoute.use(uploadMiddleware);
 apiRoute.post(async (req, res) => {
     const cookie = new Cookies(req, res);
     const gfs = await getGFS(cookie.get("token"));
-    req.files.forEach(async (file) => {
-        const filepath = path.join(file.destination, file.filename);
-        await gfs.uploadFile(req.body.path, fs.createReadStream(filepath), {
-            filename: file.filename,
-            filesize: file.size,
-            onUploadProgress: (e) => {
-                console.log(e);
-            },
-        });
-        fs.rmSync(filepath);
-    });
-    res.status(200).json(req.files);
+    try {
+        for (const file of req.files) {
+            console.log(`Uploading.. ${file.filename}`);
+            const filepath = path.join(file.destination, file.filename);
+            await gfs.uploadFile(req.body.path, fs.createReadStream(filepath), {
+                filename: file.filename,
+                filesize: file.size,
+                onUploadProgress: () => {},
+            });
+            fs.rmSync(filepath);
+            console.log(`File uploaded to gdrive: ${file.filename}`);
+        }
+        res.status(200).json(req.files);
+    } catch (e) {
+        console.error(e);
+        res.status(500);
+    }
 });
 
 export default apiRoute;

@@ -109,3 +109,4 @@ keys
 .theia
 .DS_Store
 .env
+public/uploads

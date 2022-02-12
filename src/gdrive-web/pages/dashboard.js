@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import FileTree from "../components/filetree";
 import Header from "../components/header";
 import FileView from "../components/FileView";

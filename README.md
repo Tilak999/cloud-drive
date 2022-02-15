@@ -26,5 +26,9 @@ node scripts\storageQuota.js
 We also have a CLI tool called gfs - for interacting with the pooled cloud storage.
 [See CLI usage](/gfs-cli)
 
+## Web UI
+To run the Web UI locally, you need to setup heroku account and add free postgres database to project.
+export DATABASE_URL variable in the commandline and run `npm run dev`
+
 ## About master key file
 The master key file is nothing but collection of all the service account keys. Inside the json each service account key is mapped to corresponding service account file name. If you need to get the service account key files then they are present under `keys` directory.

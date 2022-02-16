@@ -9,7 +9,7 @@ export default async function getGFS(uuid) {
     if (q.rowCount == 1) {
         global[uuid] = new GdriveFS({
             masterKeyFile: q.rows[0].key,
-            debug: process.env.ENV != "Production",
+            debug: process.env.ENV != "production",
         });
     }
     return global[uuid];

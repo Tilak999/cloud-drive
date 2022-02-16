@@ -2,7 +2,7 @@ import axios from "axios";
 import path from "path";
 
 const upload_queue = [];
-const current_active = null;
+let current_active = null;
 const completed = [];
 
 let isRunning = false;

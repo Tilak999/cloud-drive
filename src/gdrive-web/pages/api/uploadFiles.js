@@ -23,6 +23,19 @@ const apiRoute = nextConnect({
 const uploadMiddleware = upload.array("files");
 apiRoute.use(uploadMiddleware);
 
+async function createPathIfNotExist(gfs, baseDirectory) {
+    let root = "gfs:/";
+    baseDirectory = baseDirectory.replace("gfs:/", "");
+    for (const part of baseDirectory.split("/")) {
+        const exist = await gfs.checkIfEntityExist(path.join(root, part));
+        if (!exist) {
+            console.log("creating dir: ", path.join(root, part));
+            await gfs.createDirectory(root, part);
+        }
+        root = path.join(root, part);
+    }
+}
+
 // Process a POST request
 apiRoute.post(async (req, res) => {
     const cookie = new Cookies(req, res);
@@ -31,12 +44,13 @@ apiRoute.post(async (req, res) => {
         for (const file of req.files) {
             console.log(`Uploading.. ${file.filename}`);
             const filepath = path.join(file.destination, file.filename);
+            await createPathIfNotExist(gfs, req.body.path);
             await gfs.uploadFile(req.body.path, fs.createReadStream(filepath), {
                 filename: file.filename,
                 filesize: file.size,
-                onUploadProgress: () => {},
+                onUploadProgress: (e) => {},
             });
-            fs.rmSync(filepath);
+            fs.rm(filepath, () => console.log("file removed"));
             console.log(`File uploaded to gdrive: ${file.filename}`);
         }
         res.status(200).json(req.files);

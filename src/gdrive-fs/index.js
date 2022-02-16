@@ -290,9 +290,6 @@ class GdriveFS {
                         resource,
                         fields,
                     });
-
-                    console.log($baseDir, parentDir.data.symlinkId);
-                    console.log(symlinkResp);
                     return {
                         status: GdriveFS.OK,
                         data: normaliseFileData(symlinkResp.data),

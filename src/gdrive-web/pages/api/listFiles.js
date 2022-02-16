@@ -1,6 +1,5 @@
 import Cookies from "cookies";
-import GdriveFS from "../../../gdrive-fs";
-import getGFS from "../../lib/Gdrive";
+import getGFS from "../../lib/gdrive";
 
 export default async function listFiles(req, res) {
     const cookie = new Cookies(req, res);

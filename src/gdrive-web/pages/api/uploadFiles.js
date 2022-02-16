@@ -1,5 +1,5 @@
 import Cookies from "cookies";
-import getGFS from "../../lib/Gdrive";
+import getGFS from "../../lib/gdrive";
 import nextConnect from "next-connect";
 import multer from "multer";
 import fs from "fs";

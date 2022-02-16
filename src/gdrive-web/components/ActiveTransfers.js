@@ -74,7 +74,7 @@ export default function ActiveTransfers() {
                 )}
                 {transfers.upload_queue.length > 0 && (
                     <div className="p-3">
-                        Queue:
+                        Queue: ({transfers.upload_queue.length})
                         {transfers.upload_queue.map((file) => (
                             <div
                                 key={file.name}
@@ -97,7 +97,7 @@ export default function ActiveTransfers() {
                 )}
                 {transfers.completed.length > 0 && (
                     <div className="p-3">
-                        Completed:
+                        Completed: ({transfers.completed.length})
                         {transfers.completed.map((file) => (
                             <div
                                 key={file.name}

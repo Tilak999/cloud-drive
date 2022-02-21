@@ -1,13 +1,47 @@
-const utils = require("../lib/utils");
-const authorize = require("../lib/auth");
-const path = require("path");
-const { google } = require("googleapis");
+import utils from "../lib/utils";
+import authorize from "../lib/auth";
+import path from "path";
+import { drive_v3, google } from "googleapis";
 const drive = google.drive("v3");
 
 const GFS_PREFIX = "gfs:";
 const GFS_METADATA_ROOT_DIR = `${GFS_PREFIX}/_.metadata._`;
 const MIME_TYPE_DIRECTORY = "application/vnd.google-apps.folder";
 const MIME_TYPE_LINK = "application/vnd.drive-fs.symlink";
+
+// Constants
+const Messages = {
+    ALREADY_EXIST: "entity already exist",
+    OK: "ok",
+    NOT_FOUND: "entity not found",
+    DIRECTORY_NOT_EMPTY: "Directory is not Empty",
+};
+
+interface DriveFile {
+    name: String;
+    mimeType: String;
+    iconLink: String;
+    hasThumbnail: boolean;
+    modifiedTime: Date;
+    originalFileId: String;
+    path: String;
+    isDirectory: boolean;
+    originalFileProperties: object;
+}
+
+interface config {
+    masterKeyFile: {
+        serviceAccounts: object;
+        indexStoreKey: string;
+    };
+    enableDebugLogs: boolean;
+}
+
+interface uploadConfig {
+    filename: string;
+    filesize: number;
+    onUploadProgress: (progress: ProgressEvent) => void;
+}
 
 function normaliseFileData(file) {
     const additionalFields = {
@@ -36,115 +70,133 @@ function getAbsolutePath(inputPath) {
 }
 
 class GdriveFS {
-    // Private Fields
-    _keyFile = null;
-    _debug = false;
-    _indexAuth = null;
+    private _keyFile: any;
+    private _debug: boolean = false;
+    private _indexAuth: any;
+    private _enableDebugLogs: boolean = false;
+    private _metadata: any;
 
-    // Constants
-    static ALREADY_EXIST = "entity already exist";
-    static OK = "ok";
-    static NOT_FOUND = "entity not found";
-    static DIRECTORY_NOT_EMPTY = "Directory is not Empty";
-
-    constructor({ masterKeyFile, debug }) {
+    constructor({ masterKeyFile, enableDebugLogs }: config) {
         if (!masterKeyFile) throw "KeyFile is required";
         this._keyFile = masterKeyFile["serviceAccounts"];
         this._indexAuth = this._keyFile[masterKeyFile["indexStoreKey"]];
-        this._debug = debug;
-        this.getIndexDirectory();
+        this._enableDebugLogs = enableDebugLogs;
+        this.getIndexDirectory().then((val) => (this._metadata = val));
+    }
+
+    async authorize(key: object) {
+        const auth = new google.auth.GoogleAuth({
+            credentials: key,
+            scopes: [
+                "https://www.googleapis.com/auth/cloud-platform",
+                "https://www.googleapis.com/auth/drive",
+            ],
+        });
+        return await auth.getClient();
+    }
+
+    private log(...args: any[]) {
+        this._enableDebugLogs && console.log("[grive-fs]", ...args);
     }
 
     async getIndexDirectory() {
-        if (this._metadata) return this._metadata;
-        else {
+        if (this._metadata) {
+            return this._metadata;
+        }
+        try {
             const auth = await authorize(this._indexAuth);
-            const resp = await drive.files.list({
+            const { data } = await drive.files.list({
                 auth,
                 q: `name='${GFS_METADATA_ROOT_DIR}'`,
             });
-            if (resp.data.files.length == 0) {
-                this._debug && console.log("creating metadata directory");
-                const resource = {
-                    originalFilename: "metadata",
-                    name: GFS_METADATA_ROOT_DIR,
-                    mimeType: MIME_TYPE_DIRECTORY,
-                    parents: ["root"],
-                };
-                const resp = await drive.files.create({ auth, resource });
-                this._metadata = resp.data;
+
+            if (data != null && data.files != null && data.files.length > 0) {
+                this.log("Metadata directory already present");
+                return data.files[0];
             } else {
-                this._debug &&
-                    console.log("Metadata directory already present");
-                this._metadata = resp.data.files[0];
+                this.log("creating metadata directory");
+                const { data } = await drive.files.create({
+                    auth,
+                    requestBody: {
+                        originalFilename: "metadata",
+                        name: GFS_METADATA_ROOT_DIR,
+                        mimeType: MIME_TYPE_DIRECTORY,
+                        parents: ["root"],
+                    },
+                });
+                return data;
             }
-            return this._metadata;
+        } catch (e) {
+            this.log("Error: ", e);
+            throw e;
         }
     }
 
-    async list($path, $listDirectoryContents) {
-        this._validateGfsPath($path);
-        const absPath = getAbsolutePath($path);
+    async list(path: string, listContents: boolean) {
+        this._validateGfsPath(path);
+        const absPath = getAbsolutePath(path);
         const auth = await authorize(this._indexAuth);
         const fields = `files(mimeType, id, name, size, modifiedTime, hasThumbnail, iconLink, originalFilename, description)`;
         const q = `name='${absPath}'`;
         const resp = await drive.files.list({ auth, fields, q });
         const files = resp.data.files;
 
-        if (files.length == 0) {
+        if (files == null || files.length == 0) {
             return {
-                status: GdriveFS.NOT_FOUND,
+                status: Messages.NOT_FOUND,
+                data: resp.data,
             };
         } else {
             const isDirectory = files[0].mimeType == MIME_TYPE_DIRECTORY;
-            if (isDirectory && $listDirectoryContents) {
+            if (isDirectory && listContents) {
                 const directoryId = files[0].id;
                 const q = `'${directoryId}' in parents`;
                 const result = await drive.files.list({ auth, fields, q });
-                return {
-                    status: GdriveFS.OK,
-                    files: result.data.files.map(normaliseFileData),
-                };
+                if (result.data != null && result.data.files != null)
+                    return {
+                        status: Messages.OK,
+                        files: result.data.files.map(normaliseFileData),
+                    };
             } else {
                 return {
-                    status: GdriveFS.OK,
+                    status: Messages.OK,
                     files: [normaliseFileData(files[0])],
                 };
             }
         }
     }
 
-    async checkIfEntityExist($path, $includeData) {
-        this._validateGfsPath($path);
-        const absPath = getAbsolutePath($path);
+    async checkIfEntityExist(path: string, includeData?: boolean) {
+        this._validateGfsPath(path);
+        const absPath = getAbsolutePath(path);
         const auth = await authorize(this._indexAuth);
         const fields = `files(mimeType, id, name, size, modifiedTime, description, parents)`;
         const q = `name='${absPath}'`;
         const resp = await drive.files.list({ auth, fields, q });
 
-        const fileCount = resp.data.files.length;
-        if ($includeData && fileCount > 0) {
-            const files = resp.data.files;
-            const isDirectory = files[0].mimeType == MIME_TYPE_DIRECTORY;
-            return {
-                exist: fileCount > 0,
-                isDirectory,
-                data: fileCount > 0 ? normaliseFileData(files[0]) : null,
-            };
+        if (resp.data != null && resp.data.files != null) {
+            const fileCount = resp.data.files.length;
+            if (includeData && fileCount > 0) {
+                const files = resp.data.files;
+                const isDirectory = files[0].mimeType == MIME_TYPE_DIRECTORY;
+                return {
+                    exist: fileCount > 0,
+                    isDirectory,
+                    data: fileCount > 0 ? normaliseFileData(files[0]) : null,
+                };
+            }
+            return { exist: fileCount > 0 };
         }
-        return fileCount > 0;
+        return { exist: false };
     }
 
-    async createDirectory($baseDir, $dirName) {
-        if (!$baseDir || !$dirName)
-            throw `Parameters required: ($baseDir, $dirName)`;
+    async createDirectory(baseDir: string, dirName: string) {
+        if (!baseDir || !dirName)
+            throw `Parameters required: (baseDir, dirName)`;
 
-        this._validateGfsPath($baseDir);
+        this._validateGfsPath(baseDir);
         const metadata = await this.getIndexDirectory();
-        const absPath = getAbsolutePath(path.join($baseDir, $dirName));
-
-        //check if directory exist
-        const directoryExist = await this.checkIfEntityExist(absPath);
+        const absPath = getAbsolutePath(path.join(baseDir, dirName));
 
         // check if parent directory exist
         const parentDir = await this.checkIfEntityExist(
@@ -152,44 +204,54 @@ class GdriveFS {
             true
         );
 
-        if (!parentDir.exist || !parentDir.isDirectory)
-            throw (
-                "Parent directory doesn't exist: " +
-                path.parse(path.join($baseDir, $dirName)).dir
-            );
+        if (!parentDir.exist || !parentDir.isDirectory) {
+            throw `Parent directory doesn't exist: ${
+                path.parse(path.join(baseDir, dirName)).dir
+            }`;
+        }
 
+        // check if directory exist
+        const directoryExist = await this.checkIfEntityExist(absPath);
         if (!directoryExist) {
-            const resource = {
-                originalFilename: $dirName,
-                name: absPath,
-                mimeType: MIME_TYPE_DIRECTORY,
-                parents: [parentDir.data.symlinkId || metadata.id],
-            };
             const auth = await authorize(this._indexAuth);
-            const resp = await drive.files.create({ auth, resource });
+            const resp = await drive.files.create({
+                auth,
+                requestBody: {
+                    originalFilename: dirName,
+                    name: absPath,
+                    mimeType: MIME_TYPE_DIRECTORY,
+                    parents: [parentDir.data.symlinkId || metadata.id],
+                },
+            });
             return {
-                status: GdriveFS.OK,
+                status: Messages.OK,
                 data: normaliseFileData(resp.data),
             };
         } else {
             return {
-                status: GdriveFS.ALREADY_EXIST,
+                status: Messages.ALREADY_EXIST,
             };
         }
     }
 
-    async getStorageInfo(serviceAuth) {
-        const action = async (serviceAuth) => {
+    async getStorageInfo(serviceAuth: any) {
+        const action = async (serviceAuth: any) => {
             const auth = await authorize(serviceAuth);
             const resp = await drive.about.get({
                 auth,
-                fields: ["storageQuota"],
+                fields: "storageQuota",
             });
             const storageInfo = resp.data.storageQuota;
-            for (const key of Object.keys(storageInfo)) {
-                storageInfo[key] = parseInt(storageInfo[key]);
+            if (storageInfo != null) {
+                const { limit, usage, usageInDrive } = storageInfo;
+                return {
+                    limit: parseFloat(limit || "0"),
+                    usage: parseFloat(usage || "0"),
+                    usageInDrive: parseFloat(usageInDrive || "0"),
+                };
+            } else {
+                throw `Failed to fetch storage information for service account ${serviceAuth.client_email}`;
             }
-            return storageInfo;
         };
         if (serviceAuth) return action(serviceAuth);
         const promises = Object.keys(this._keyFile).map((serviceAccountName) =>
@@ -197,41 +259,42 @@ class GdriveFS {
         );
         const info = await Promise.all(promises);
         return info.reduce((prev, curr) => {
-            const data = {};
-            for (const key of Object.keys(prev)) {
-                data[key] = prev[key] + curr[key];
-            }
-            return data;
+            return {
+                limit: prev.limit + curr.limit,
+                usage: prev.usage + curr.usage,
+                usageInDrive: prev.usageInDrive + curr.usageInDrive,
+            };
         });
     }
 
-    async uploadFile(
-        $baseDir,
-        $fileStream,
-        { filename, filesize, onUploadProgress }
-    ) {
-        if (!$fileStream || typeof $fileStream != "object")
+    async uploadFile(baseDir: string, stream: string, config: uploadConfig) {
+        if (!stream || typeof stream != "object") {
             throw "$fileStream:ReadStream - Readable file stream is required";
+        }
 
-        if (!filename || filename.trim() == "") throw "filename: Required";
+        if (!config.filename || config.filename.trim() == "") {
+            throw "filename: Required";
+        }
 
-        if (!filesize || typeof filesize != "number")
+        if (!config.filesize || typeof config.filesize != "number")
             throw "filesize: Required";
 
-        this._validateGfsPath($baseDir);
-        const absPath = getAbsolutePath($baseDir);
+        this._validateGfsPath(baseDir);
+        const absPath = getAbsolutePath(baseDir);
 
         const file = await this.checkIfEntityExist(
-            path.join(absPath, filename),
+            path.join(absPath, config.filename),
             true
         );
 
-        if (file.exist)
-            throw "File already exist: " + path.join($baseDir, filename);
+        if (file.exist) {
+            throw "File already exist: " + path.join(baseDir, config.filename);
+        }
 
         const parentDir = await this.checkIfEntityExist(absPath, true);
-        if (!parentDir.exist || !parentDir.isDirectory)
-            throw "Base directory doesn't exist: " + $baseDir;
+        if (!parentDir.exist || !parentDir.isDirectory) {
+            throw "Base directory doesn't exist: " + baseDir;
+        }
 
         const fields =
             "mimeType, id, name, size, modifiedTime, hasThumbnail, iconLink, originalFilename, description, webViewLink";
@@ -242,26 +305,25 @@ class GdriveFS {
             const serviceAccountAuth = this._keyFile[serviceAccountName];
             const info = await this.getStorageInfo(serviceAccountAuth);
             const freeSpace = info.limit - info.usage;
-            if (freeSpace >= filesize) {
-                this._debug && console.log(serviceAccountName, ":", freeSpace);
-                const auth = await authorize(serviceAccountAuth);
+            if (freeSpace >= config.filesize) {
+                this.log(serviceAccountName, ":", freeSpace);
 
                 // create and upload actual file
                 const resp = await drive.files.create(
                     {
-                        auth,
+                        auth: await authorize(serviceAccountAuth),
                         fields,
-                        media: { body: $fileStream },
-                        resource: {
-                            originalFilename: filename,
-                            name: filename,
+                        media: { body: stream },
+                        requestBody: {
+                            originalFilename: config.filename,
+                            name: config.filename,
                             description: JSON.stringify({
-                                path: path.join(absPath, filename),
+                                path: path.join(absPath, config.filename),
                             }),
                         },
                     },
                     {
-                        onUploadProgress,
+                        onUploadProgress: config.onUploadProgress,
                     }
                 );
 
@@ -415,7 +477,7 @@ class GdriveFS {
         });
     }
 
-    _validateGfsPath(filePath) {
+    _validateGfsPath(filePath: String) {
         if (!utils.isValidGfsPath(filePath))
             throw "Invalid gfs:/.. path: " + filePath;
     }

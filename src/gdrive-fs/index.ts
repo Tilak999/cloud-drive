@@ -300,14 +300,15 @@ class GdriveFS {
             "mimeType, id, name, size, modifiedTime, hasThumbnail, iconLink, originalFilename, description, webViewLink";
 
         for (const serviceAccountName of Object.keys(this._keyFile)) {
-            if (this._indexAuth.client_email.startsWith(serviceAccountName))
+            //
+            if (this._indexAuth.client_email.startsWith(serviceAccountName)) {
                 continue;
+            }
             const serviceAccountAuth = this._keyFile[serviceAccountName];
             const info = await this.getStorageInfo(serviceAccountAuth);
             const freeSpace = info.limit - info.usage;
             if (freeSpace >= config.filesize) {
                 this.log(serviceAccountName, ":", freeSpace);
-
                 // create and upload actual file
                 const resp = await drive.files.create(
                     {

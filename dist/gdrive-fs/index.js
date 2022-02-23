@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Messages = void 0;
-const utils_1 = __importDefault(require("../lib/utils"));
+const utils_1 = require("../lib/utils");
 const path_1 = __importDefault(require("path"));
 const googleapis_1 = require("googleapis");
 const drive = googleapis_1.google.drive("v3");
@@ -401,7 +401,7 @@ class GdriveFS {
         return __awaiter(this, void 0, void 0, function* () {
             if (!source || !target)
                 throw "Parameters required ($source, $target)";
-            if (!utils_1.default.isValidGfsPath(source) || !utils_1.default.isValidGfsPath(target))
+            if (!(0, utils_1.isValidGfsPath)(source) || !(0, utils_1.isValidGfsPath)(target))
                 throw `Invalid gfs:/.. path: [${source},${target}]`;
             if (source == target)
                 throw `Source and target can't be same: [${source},${target}]`;
@@ -438,7 +438,7 @@ class GdriveFS {
         });
     }
     _validateGfsPath(filePath) {
-        if (!utils_1.default.isValidGfsPath(filePath))
+        if (!(0, utils_1.isValidGfsPath)(filePath))
             throw "Invalid gfs:/.. path: " + filePath;
     }
     _listAllFiles() {

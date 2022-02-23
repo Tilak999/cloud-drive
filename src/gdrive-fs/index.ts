@@ -1,4 +1,4 @@
-import utils from "../lib/utils";
+import { isValidGfsPath } from "../lib/utils";
 import path from "path";
 import { google } from "googleapis";
 import { Stream } from "stream";
@@ -445,7 +445,7 @@ export default class GdriveFS {
 
     async move(source: string, target: string) {
         if (!source || !target) throw "Parameters required ($source, $target)";
-        if (!utils.isValidGfsPath(source) || !utils.isValidGfsPath(target))
+        if (!isValidGfsPath(source) || !isValidGfsPath(target))
             throw `Invalid gfs:/.. path: [${source},${target}]`;
         if (source == target)
             throw `Source and target can't be same: [${source},${target}]`;
@@ -483,7 +483,7 @@ export default class GdriveFS {
     }
 
     private _validateGfsPath(filePath: string) {
-        if (!utils.isValidGfsPath(filePath))
+        if (!isValidGfsPath(filePath))
             throw "Invalid gfs:/.. path: " + filePath;
     }
 

@@ -1,9 +1,10 @@
+// @ts-nocheck
 import React, { useRef, useState } from "react";
 import FileActionBtn from "./FileActionBtn";
 import uploadFile from "../lib/uploadHandler";
 import Modal from "./Modal";
 
-export default function UploadAction({ directoryPath }) {
+export default function UploadAction({ directoryPath, onCompletion }) {
     const inputFolder = useRef();
     const inputFile = useRef();
     const [visible, setVisible] = useState(false);

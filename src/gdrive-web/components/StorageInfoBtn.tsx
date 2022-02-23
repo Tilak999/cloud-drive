@@ -30,7 +30,7 @@ export default function StorageInfoBtn(props) {
             })
             .catch((e) => {
                 setModalVisibility(false);
-                notify("Error occured: see console logs", "error");
+                notify().failed("Error occured: see console logs");
                 console.error(e);
             });
     };

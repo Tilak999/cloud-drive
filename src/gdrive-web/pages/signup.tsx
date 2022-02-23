@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useRouter } from "next/dist/client/router";
 import { useRef, useState } from "react";
-import { validateEmail } from "../../lib/utils";
+import { validateEmail } from "../../dist/lib/utils";
 import notify from "../lib/notify";
 
 export default function signup() {

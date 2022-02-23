@@ -1,7 +1,7 @@
 import axios from "axios";
 import React from "react";
 import notify from "../lib/notify";
-import FileActionBtn from "./FileActionBtn";
+import FileActionBtn from "@components/FileActionBtn";
 
 export default function CreateFolderAction({ directoryPath, onCompletion }) {
     const onClick = () => {

@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import FileTree from "../components/filetree";
-import Header from "../components/header";
-import FileView from "../components/FileView";
+import FileTree from "@components/filetree";
+import Header from "@components/header";
+import FileView from "@components/FileView";
 import { useRouter } from "next/dist/client/router";
 
 function HomePage() {
@@ -14,7 +14,7 @@ function HomePage() {
     const [selectedFolder, setSelectedFolder] = useState(home);
     const router = useRouter();
 
-    const fetchFiles = async (nodeId) => {
+    const fetchFiles = async (nodeId?: any) => {
         if (filetree.length == 0 || nodeId == null) {
             const { data } = await axios.post("/api/listFiles");
             setFiletree(data.files);

@@ -1,6 +1,6 @@
-import db from "../../lib/db";
+import db from "@lib/db";
 import Cookies from "cookies";
-import { calcHash } from "../../../lib/utils";
+import { calcHash } from "@lib/utils";
 
 export default async function signin(req, res) {
     const { email, password } = req.body;

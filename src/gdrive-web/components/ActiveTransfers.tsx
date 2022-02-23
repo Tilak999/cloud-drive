@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import useInterval from "../hooks/useInterval";
 import { getTransferQueueStatus } from "../lib/uploadHandler";
 import Modal from "./Modal";
-import { humanFileSize } from "../../lib/utils";
+import { humanFileSize } from "@lib/utils";
 
 export default function ActiveTransfers() {
     const [transfers, setTransfers] = useState({
@@ -122,6 +122,6 @@ export default function ActiveTransfers() {
                     <div className="p-6 text-center">No active transfers</div>
                 )}
             </Modal>
-        </React.Fragment>
+            </React.Fragment>
     );
 }

@@ -1,5 +1,5 @@
 import Cookies from "cookies";
-import getGFS from "../../lib/gdrive";
+import getGFS from "@lib/gdrive";
 import path from "path";
 
 export default async function downloadFile(req, res) {

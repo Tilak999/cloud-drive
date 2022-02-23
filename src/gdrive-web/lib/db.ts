@@ -31,5 +31,5 @@ async function createTables(pool) {
 }
 
 export default {
-    query: (text, params) => pool.query(text, params),
+    query: (text: any, params?: any) => pool.query(text, params),
 };

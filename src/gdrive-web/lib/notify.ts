@@ -9,17 +9,19 @@ const icons = {
     info: `<i class="bi bi-info-circle-fill"></i>`,
     loading: `<i class="bi bi-arrow-repeat animate-spin inline-block"></i>`,
     success: `<i class="bi bi-check-circle-fill"></i>`,
+    error: `<i class="bi bi-exclamation-triangle-fill"></i>`,
 };
 
 const style =
     "position:fixed; bottom: 0; background: $color; margin: 20px; transition: all; padding: 15px; padding-right: 20px; border-radius:8px; color: white";
 
-export default function notify(timeout) {
+export default function notify(timeout?: number) {
     const div = window.document.createElement("div");
     div.id = "alert-box";
     window.document.body.appendChild(div);
     return {
         withLoading: (message) => {
+            //@ts-ignore
             div.style = style.replace("$color", colors.progress);
             div.innerHTML = icons.loading + "&nbsp;" + message;
             return {
@@ -27,6 +29,7 @@ export default function notify(timeout) {
                     div.remove();
                 },
                 success: (message) => {
+                    //@ts-ignore
                     div.style = style.replace("$color", colors.success);
                     div.innerHTML = icons.success + "&nbsp;" + message;
                     setTimeout(() => {
@@ -34,6 +37,7 @@ export default function notify(timeout) {
                     }, timeout || 3000);
                 },
                 failed: (message) => {
+                    //@ts-ignore
                     div.style = style.replace("$color", colors.error);
                     div.innerHTML = icons.error + "&nbsp;" + message;
                     setTimeout(() => {
@@ -43,8 +47,17 @@ export default function notify(timeout) {
             };
         },
         success: (message) => {
+            //@ts-ignore
             div.style = style.replace("$color", colors.success);
             div.innerHTML = icons.success + "&nbsp;" + message;
+            setTimeout(() => {
+                div.remove();
+            }, timeout || 3000);
+        },
+        failed: (message) => {
+            //@ts-ignore
+            div.style = style.replace("$color", colors.error);
+            div.innerHTML = icons.error + "&nbsp;" + message;
             setTimeout(() => {
                 div.remove();
             }, timeout || 3000);

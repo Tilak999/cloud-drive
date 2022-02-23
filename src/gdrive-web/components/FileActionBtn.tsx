@@ -9,7 +9,13 @@ const btnGroup = {
     upload: { icon: "bi-arrow-bar-up", text: "Upload", action: "upload" },
 };
 
-export default function FileActionBtn({ disabled, type, onClick }) {
+interface propType {
+    disabled?: boolean;
+    type: any;
+    onClick: (e: any) => void;
+}
+
+export default function FileActionBtn({ disabled, type, onClick }: propType) {
     const hint = btnGroup[type].tip || btnGroup[type].text;
     return (
         <>

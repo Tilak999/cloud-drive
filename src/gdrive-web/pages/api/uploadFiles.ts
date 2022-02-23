@@ -1,9 +1,10 @@
 import Cookies from "cookies";
-import getGFS from "../../lib/gdrive";
+import getGFS from "@lib/gdrive";
 import nextConnect from "next-connect";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import { NextApiRequest, NextApiResponse } from "next";
 
 // Returns a Multer instance that provides several methods for generating
 // middleware that process files uploaded in multipart/form-data format.
@@ -15,7 +16,7 @@ const upload = multer({
 });
 
 const apiRoute = nextConnect({
-    onNoMatch(req, res) {
+    onNoMatch(req: NextApiRequest, res: NextApiResponse) {
         res.status(405).json({ error: `Method '${req.method}' Not Allowed` });
     },
 });
@@ -36,8 +37,12 @@ async function createPathIfNotExist(gfs, baseDirectory) {
     }
 }
 
+interface NextApiRequestWithFile extends NextApiRequest {
+    files?: any;
+}
+
 // Process a POST request
-apiRoute.post(async (req, res) => {
+apiRoute.post(async (req: NextApiRequestWithFile, res: NextApiResponse) => {
     const cookie = new Cookies(req, res);
     const gfs = await getGFS(cookie.get("token"));
     try {

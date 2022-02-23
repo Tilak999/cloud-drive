@@ -1,4 +1,12 @@
-export default function Spinner({ visible, compact, text }) {
+import React from "react";
+
+interface propType {
+    visible: boolean;
+    compact?: boolean;
+    text: string;
+}
+
+export default function Spinner({ visible, compact, text }: propType) {
     return visible ? (
         compact ? (
             <div className="w-full">
@@ -12,6 +20,6 @@ export default function Spinner({ visible, compact, text }) {
             </div>
         )
     ) : (
-        ""
+        <React.Fragment />
     );
 }

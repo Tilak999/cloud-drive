@@ -14,6 +14,7 @@ export default function FileView({ directoryNode }) {
 
     const [currentView, setCurrentView] = useState({
         title: "",
+        path: null,
         childrens: [],
     });
 
@@ -32,7 +33,7 @@ export default function FileView({ directoryNode }) {
             setLoading(false);
         } else {
             console.log(node);
-            window.location = `/api/download?path=${node.path}`;
+            window.location.href = `/api/download?path=${node.path}`;
         }
     };
 

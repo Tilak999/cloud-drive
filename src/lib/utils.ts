@@ -1,9 +1,9 @@
 import cliTable from "cli-table";
 import crypto from "crypto";
 
-export function isValidGfsPath(path: string) {
+export const isValidGfsPath = (path: string) => {
     return path && path.startsWith("gfs:/");
-}
+};
 
 export function table(head: string[] | undefined) {
     const chars = {
@@ -50,5 +50,9 @@ export function calcHash(somestring: string) {
 }
 
 export default {
-    isValidGfsPath, calcHash, validateEmail, humanFileSize, table
-}
+    isValidGfsPath,
+    calcHash,
+    validateEmail,
+    humanFileSize,
+    table,
+};

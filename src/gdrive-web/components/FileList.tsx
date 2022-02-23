@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { humanFileSize } from "../../lib/utils";
+import { humanFileSize } from "@lib/utils";
 
 function getDate(dateStr) {
     const date = new Date(dateStr);

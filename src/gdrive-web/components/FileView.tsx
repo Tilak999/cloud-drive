@@ -1,11 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import Button from "./button";
-import Spinner from "./spinner";
-import UploadAction from "./UploadAction";
-import FileList from "./FileList";
-import DeleteAction from "./DeleteAction";
-import CreateFolderAction from "./CreateFolderAction";
+import Button from "@components/button";
+import Spinner from "@components/spinner";
+import UploadAction from "@components/UploadAction";
+import FileList from "@components/FileList";
+import DeleteAction from "@components/DeleteAction";
+import CreateFolderAction from "@components/CreateFolderAction";
 
 export default function FileView({ directoryNode }) {
     const [history, setHistory] = useState([]);

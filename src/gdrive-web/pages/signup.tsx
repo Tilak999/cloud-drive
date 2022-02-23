@@ -1,18 +1,18 @@
 import axios from "axios";
 import { useRouter } from "next/dist/client/router";
 import { useRef, useState } from "react";
-import { validateEmail } from "../../dist/lib/utils";
-import notify from "../lib/notify";
+import { validateEmail } from "@lib/utils";
+import notify from "@lib/notify";
 
 export default function signup() {
-    const fileInput = useRef();
+    const fileInput = useRef(null);
     const [key, setKey] = useState({ name: null, text: null });
-    const [message, setMessage] = useState();
+    const [message, setMessage] = useState<string>();
     const router = useRouter();
 
     const createKey = (e) => {
         e.preventDefault();
-        setMessage();
+        setMessage(null);
         const email = e.target[0].value;
         const password = e.target[1].value;
         if (!email || !validateEmail(email))
@@ -34,11 +34,13 @@ export default function signup() {
     };
 
     const onFileSelected = async () => {
-        const file = fileInput.current.files.item(0);
-        setKey({
-            name: file.name,
-            text: await file.text(),
-        });
+        if (fileInput.current && fileInput.current.files) {
+            const file = fileInput.current.files.item(0);
+            setKey({
+                name: file.name,
+                text: await file.text(),
+            });
+        }
     };
 
     return (

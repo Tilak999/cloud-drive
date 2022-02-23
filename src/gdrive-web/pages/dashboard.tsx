@@ -20,7 +20,7 @@ function HomePage() {
             setFiletree(data.files);
         } else {
             const items = nodeId.split(",");
-            let target = filetree;
+            let target: any = filetree;
             for (let i of items) {
                 target = target[i] || target.childrens[i];
             }

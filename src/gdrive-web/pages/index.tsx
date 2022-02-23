@@ -1,16 +1,16 @@
 import axios from "axios";
 import { useRouter } from "next/dist/client/router";
-import { useRef, useState } from "react";
-import { validateEmail } from "../../dist/lib/utils";
+import { useState } from "react";
+import { validateEmail } from "@lib/utils";
 import notify from "../lib/notify";
 
 export default function login() {
-    const [message, setMessage] = useState();
+    const [message, setMessage] = useState<string>();
     const router = useRouter();
 
     const signin = (e) => {
         e.preventDefault();
-        setMessage();
+        setMessage(null);
         const email = e.target[0].value;
         const password = e.target[1].value;
         if (!email || !validateEmail(email))

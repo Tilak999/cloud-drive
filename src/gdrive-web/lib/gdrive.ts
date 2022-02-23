@@ -1,5 +1,5 @@
-import GdriveFS from "../../gdrive-fs";
-import db from "./db";
+import GdriveFS from "@dist/gdrive-fs";
+import db from "@lib/db";
 
 export default async function getGFS(uuid) {
     if (uuid in global) {
@@ -9,7 +9,7 @@ export default async function getGFS(uuid) {
     if (q.rowCount == 1) {
         global[uuid] = new GdriveFS({
             masterKeyFile: q.rows[0].key,
-            debug: process.env.NODE_ENV != "production",
+            enableDebugLogs: process.env.NODE_ENV != "production",
         });
     }
     return global[uuid];

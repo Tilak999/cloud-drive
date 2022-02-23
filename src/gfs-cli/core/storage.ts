@@ -1,7 +1,9 @@
+import GdriveFS from "../../gdrive-fs";
+
 const utils = require("../../lib/utils");
 const ora = require("ora");
 
-module.exports = async function (gfs, list, debug) {
+module.exports = async function (gfs: GdriveFS, list: string, debug: boolean) {
     const spinner = ora("Fetching..").start();
     const resp = await gfs.getStorageInfo();
     spinner.stop();

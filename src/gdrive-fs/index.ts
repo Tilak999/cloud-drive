@@ -1,7 +1,7 @@
 import utils from "../lib/utils";
-import authorize from "../lib/auth";
 import path from "path";
-import { drive_v3, google } from "googleapis";
+import { google } from "googleapis";
+import { Stream } from "stream";
 const drive = google.drive("v3");
 
 const GFS_PREFIX = "gfs:";
@@ -10,7 +10,7 @@ const MIME_TYPE_DIRECTORY = "application/vnd.google-apps.folder";
 const MIME_TYPE_LINK = "application/vnd.drive-fs.symlink";
 
 // Constants
-const Messages = {
+export const Messages = {
     ALREADY_EXIST: "entity already exist",
     OK: "ok",
     NOT_FOUND: "entity not found",
@@ -40,10 +40,10 @@ interface config {
 interface uploadConfig {
     filename: string;
     filesize: number;
-    onUploadProgress: (progress: ProgressEvent) => void;
+    onUploadProgress: (progress: any) => void;
 }
 
-function normaliseFileData(file) {
+function normaliseFileData(file: any) {
     const additionalFields = {
         symlinkId: file.id,
         path: file.name.replace(GFS_METADATA_ROOT_DIR, GFS_PREFIX),
@@ -59,7 +59,7 @@ function normaliseFileData(file) {
     return { ...file, ...additionalFields, ...metadata };
 }
 
-function getAbsolutePath(inputPath) {
+function getAbsolutePath(inputPath: string) {
     if (inputPath.indexOf(GFS_METADATA_ROOT_DIR) == -1) {
         return inputPath
             .replace(GFS_PREFIX, GFS_METADATA_ROOT_DIR)
@@ -69,14 +69,14 @@ function getAbsolutePath(inputPath) {
     return inputPath.trim().replace(/\/$/g, "");
 }
 
-class GdriveFS {
+export default class GdriveFS {
     private _keyFile: any;
     private _debug: boolean = false;
     private _indexAuth: any;
     private _enableDebugLogs: boolean = false;
     private _metadata: any;
 
-    constructor({ masterKeyFile, enableDebugLogs }: config) {
+    constructor({ masterKeyFile, enableDebugLogs }: config | any) {
         if (!masterKeyFile) throw "KeyFile is required";
         this._keyFile = masterKeyFile["serviceAccounts"];
         this._indexAuth = this._keyFile[masterKeyFile["indexStoreKey"]];
@@ -104,7 +104,7 @@ class GdriveFS {
             return this._metadata;
         }
         try {
-            const auth = await authorize(this._indexAuth);
+            const auth = await this.authorize(this._indexAuth);
             const { data } = await drive.files.list({
                 auth,
                 q: `name='${GFS_METADATA_ROOT_DIR}'`,
@@ -132,10 +132,10 @@ class GdriveFS {
         }
     }
 
-    async list(path: string, listContents: boolean) {
+    async list(path: string) {
         this._validateGfsPath(path);
         const absPath = getAbsolutePath(path);
-        const auth = await authorize(this._indexAuth);
+        const auth = await this.authorize(this._indexAuth);
         const fields = `files(mimeType, id, name, size, modifiedTime, hasThumbnail, iconLink, originalFilename, description)`;
         const q = `name='${absPath}'`;
         const resp = await drive.files.list({ auth, fields, q });
@@ -145,10 +145,11 @@ class GdriveFS {
             return {
                 status: Messages.NOT_FOUND,
                 data: resp.data,
+                files: null,
             };
         } else {
             const isDirectory = files[0].mimeType == MIME_TYPE_DIRECTORY;
-            if (isDirectory && listContents) {
+            if (isDirectory) {
                 const directoryId = files[0].id;
                 const q = `'${directoryId}' in parents`;
                 const result = await drive.files.list({ auth, fields, q });
@@ -157,6 +158,7 @@ class GdriveFS {
                         status: Messages.OK,
                         files: result.data.files.map(normaliseFileData),
                     };
+                else throw "Error while fetching files in directory.";
             } else {
                 return {
                     status: Messages.OK,
@@ -169,7 +171,7 @@ class GdriveFS {
     async checkIfEntityExist(path: string, includeData?: boolean) {
         this._validateGfsPath(path);
         const absPath = getAbsolutePath(path);
-        const auth = await authorize(this._indexAuth);
+        const auth = await this.authorize(this._indexAuth);
         const fields = `files(mimeType, id, name, size, modifiedTime, description, parents)`;
         const q = `name='${absPath}'`;
         const resp = await drive.files.list({ auth, fields, q });
@@ -213,7 +215,7 @@ class GdriveFS {
         // check if directory exist
         const directoryExist = await this.checkIfEntityExist(absPath);
         if (!directoryExist) {
-            const auth = await authorize(this._indexAuth);
+            const auth = await this.authorize(this._indexAuth);
             const resp = await drive.files.create({
                 auth,
                 requestBody: {
@@ -234,9 +236,9 @@ class GdriveFS {
         }
     }
 
-    async getStorageInfo(serviceAuth: any) {
+    async getStorageInfo(serviceAuth?: any) {
         const action = async (serviceAuth: any) => {
-            const auth = await authorize(serviceAuth);
+            const auth = await this.authorize(serviceAuth);
             const resp = await drive.about.get({
                 auth,
                 fields: "storageQuota",
@@ -267,7 +269,7 @@ class GdriveFS {
         });
     }
 
-    async uploadFile(baseDir: string, stream: string, config: uploadConfig) {
+    async uploadFile(baseDir: string, stream: Stream, config: uploadConfig) {
         if (!stream || typeof stream != "object") {
             throw "$fileStream:ReadStream - Readable file stream is required";
         }
@@ -312,7 +314,7 @@ class GdriveFS {
                 // create and upload actual file
                 const resp = await drive.files.create(
                     {
-                        auth: await authorize(serviceAccountAuth),
+                        auth: await this.authorize(serviceAccountAuth),
                         fields,
                         media: { body: stream },
                         requestBody: {
@@ -334,8 +336,8 @@ class GdriveFS {
                 try {
                     // Create symbolic file in metadata directory
                     const resource = {
-                        originalFilename: filename,
-                        name: path.join(absPath, filename),
+                        originalFilename: config.filename,
+                        name: path.join(absPath, config.filename),
                         mimeType: MIME_TYPE_LINK,
                         description: JSON.stringify({
                             serviceAccountName,
@@ -347,14 +349,16 @@ class GdriveFS {
                         }),
                         parents: [parentDir.data.symlinkId],
                     };
-                    const indexDriveAuth = await authorize(this._indexAuth);
+                    const indexDriveAuth = await this.authorize(
+                        this._indexAuth
+                    );
                     const symlinkResp = await drive.files.create({
                         auth: indexDriveAuth,
-                        resource,
+                        requestBody: resource,
                         fields,
                     });
                     return {
-                        status: GdriveFS.OK,
+                        status: Messages.OK,
                         data: normaliseFileData(symlinkResp.data),
                     };
                 } catch (e) {
@@ -369,31 +373,31 @@ class GdriveFS {
         }
     }
 
-    async deleteFile($filePath) {
-        this._validateGfsPath($filePath);
-        const absPath = getAbsolutePath($filePath);
+    async deleteFile(filePath: string) {
+        this._validateGfsPath(filePath);
+        const absPath = getAbsolutePath(filePath);
         const result = await this.checkIfEntityExist(absPath, true);
         if (result.exist && !result.isDirectory) {
             const { symlinkId, fileId, serviceAccountName } = result.data;
             this._deleteById(this._keyFile[serviceAccountName], fileId);
             this._deleteById(this._indexAuth, symlinkId);
-            return { status: GdriveFS.OK };
+            return { status: Messages.OK };
         }
-        return { status: GdriveFS.NOT_FOUND };
+        return { status: Messages.NOT_FOUND };
     }
 
-    async deleteDirectory($filePath, $force) {
-        this._validateGfsPath($filePath);
-        const absPath = getAbsolutePath($filePath);
+    async deleteDirectory(filePath: string, force: boolean) {
+        this._validateGfsPath(filePath);
+        const absPath = getAbsolutePath(filePath);
         if (absPath == GFS_METADATA_ROOT_DIR)
             throw "Root directory can'be deleted";
 
         const result = await this.checkIfEntityExist(absPath, true);
-        let status = GdriveFS.NOT_FOUND;
+        let status = Messages.NOT_FOUND;
 
         if (result.exist && result.isDirectory) {
-            const { files } = await this.list(absPath, true);
-            if (files.length > 0 && $force) {
+            const { files } = await this.list(absPath);
+            if (files && files.length > 0 && force) {
                 // recursively delete files
                 const promises = files.map(async (file) => {
                     if (file.isDirectory) {
@@ -404,97 +408,100 @@ class GdriveFS {
                 });
                 await Promise.all(promises);
             } else {
-                status = GdriveFS.DIRECTORY_NOT_EMPTY;
+                status = Messages.DIRECTORY_NOT_EMPTY;
             }
             const id = result.data.symlinkId;
             this._deleteById(this._indexAuth, id);
-            status = GdriveFS.OK;
+            status = Messages.OK;
         }
         return { status };
     }
 
-    async downloadFile($filePath) {
-        this._validateGfsPath($filePath);
-        const absPath = getAbsolutePath($filePath);
+    async downloadFile(filePath: string) {
+        this._validateGfsPath(filePath);
+        const absPath = getAbsolutePath(filePath);
         const result = await this.checkIfEntityExist(absPath, true);
 
         if (result.exist && !result.isDirectory) {
             const { fileId, serviceAccountName } = result.data;
-            const auth = await authorize(this._keyFile[serviceAccountName]);
+            const auth = await this.authorize(
+                this._keyFile[serviceAccountName]
+            );
             const resp = await drive.files.get(
                 { auth, fileId: fileId, alt: "media" },
                 { responseType: "stream" }
             );
             return {
-                status: GdriveFS.OK,
+                status: Messages.OK,
                 length: parseInt(resp.headers["content-length"]),
                 data: resp.data,
             };
         } else {
             return {
-                status: GdriveFS.NOT_FOUND,
+                status: Messages.NOT_FOUND,
             };
         }
     }
 
-    async move($source, $target) {
-        if (!$source || !$target)
-            throw "Parameters required ($source, $target)";
-        if (!utils.isValidGfsPath($source) || !utils.isValidGfsPath($target))
-            throw `Invalid gfs:/.. path: [${$source},${$target}]`;
-        if ($source == $target)
-            throw `Source and target can't be same: [${$source},${$target}]`;
-        if ($target.indexOf(path.join($source, "/")) > -1)
-            throw `Illegal operation: Source [${$source}] is parent of target [${$target}]`;
+    async move(source: string, target: string) {
+        if (!source || !target) throw "Parameters required ($source, $target)";
+        if (!utils.isValidGfsPath(source) || !utils.isValidGfsPath(target))
+            throw `Invalid gfs:/.. path: [${source},${target}]`;
+        if (source == target)
+            throw `Source and target can't be same: [${source},${target}]`;
+        if (target.indexOf(path.join(source, "/")) > -1)
+            throw `Illegal operation: Source [${source}] is parent of target [${target}]`;
 
-        const sourceEntity = await this.checkIfEntityExist($source, true);
-        const destEntity = await this.checkIfEntityExist($target, true);
+        const sourceEntity = await this.checkIfEntityExist(source, true);
+        const destEntity = await this.checkIfEntityExist(target, true);
 
         if (destEntity.exist && destEntity.isDirectory && sourceEntity.exist) {
-            const auth = await authorize(this._indexAuth);
-            const absPath = getAbsolutePath($target);
-            const name = path.join(absPath, path.basename($source));
-
+            const auth = await this.authorize(this._indexAuth);
+            const absPath = getAbsolutePath(target);
+            const name = path.join(absPath, path.basename(source));
             const { data } = await drive.files.update({
                 auth,
                 removeParents: sourceEntity.data.parents,
-                addParents: [destEntity.data.symlinkId],
+                addParents: destEntity.data.symlinkId,
                 fileId: sourceEntity.data.symlinkId,
-                resource: { name },
+                requestBody: { name },
             });
-            return { status: GdriveFS.OK, data };
+            return { status: Messages.OK, data };
         } else {
             const message =
                 "Destination path is either invalid or not a directory.";
-            return { status: GdriveFS.NOT_FOUND, message };
+            return { status: Messages.NOT_FOUND, message };
         }
     }
 
-    async _deleteById(key, id) {
-        const auth = await authorize(key);
+    private async _deleteById(key: any, id: string) {
+        const auth = await this.authorize(key);
         return await drive.files.delete({
             auth: auth,
             fileId: id,
         });
     }
 
-    _validateGfsPath(filePath: String) {
+    private _validateGfsPath(filePath: string) {
         if (!utils.isValidGfsPath(filePath))
             throw "Invalid gfs:/.. path: " + filePath;
     }
 
-    async _listAllFiles() {
-        const auth2 = await authorize(this._indexAuth);
-        const res2 = await drive.files.list({ auth: auth2, fields: "*" });
-        this._debug && console.log(JSON.stringify(res2.data, null, 4));
+    private async _listAllFiles() {
+        const auth = await this.authorize(this._indexAuth);
+        const res = await drive.files.list({ auth: auth, fields: "*" });
+        this.log(JSON.stringify(res.data, null, 4));
     }
 
-    async _deleteAllFiles() {
-        const auth2 = await authorize(this._indexAuth);
-        const res2 = await drive.files.list({ auth: auth2, fields: "*" });
-        res2.data.files.map(async (file) => {
-            await drive.files.delete({ auth: auth2, fileId: file.id });
-        });
+    private async _deleteAllFiles() {
+        const auth = await this.authorize(this._indexAuth);
+        const res = await drive.files.list({ auth: auth, fields: "*" });
+        if (res && res.data && res.data.files) {
+            res.data.files.map(async (file) => {
+                if (file.id)
+                    await drive.files.delete({ auth, fileId: file.id });
+            });
+        }
     }
 }
 

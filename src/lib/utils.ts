@@ -1,12 +1,12 @@
-const Table = require("cli-table");
-const crypto = require("crypto");
+import cliTable from "cli-table";
+import crypto from "crypto";
 
-module.exports = {
-    isValidGfsPath(path) {
+export default {
+    isValidGfsPath(path: string) {
         return path && path.startsWith("gfs:/");
     },
 
-    table(head) {
+    table(head: string[] | undefined) {
         const chars = {
             top: " ",
             "top-mid": "",
@@ -24,23 +24,21 @@ module.exports = {
             "right-mid": "",
             middle: "\t",
         };
-        return new Table({
+        return new cliTable({
             head,
             chars,
         });
     },
 
-    humanFileSize(size) {
+    humanFileSize(size: number) {
         if (size == 0) return "0 B";
         let i = Math.floor(Math.log(size) / Math.log(1024));
-        return (
-            (size / Math.pow(1024, i)).toFixed(2) * 1 +
-            " " +
-            ["B", "KB", "MB", "GB", "TB"][i]
-        );
+        const sizeFmt = (size / Math.pow(1024, i)) * 1;
+        return (`${sizeFmt.toFixed(2)} ` +
+            ["B", "KB", "MB", "GB", "TB"][i]) as string;
     },
 
-    validateEmail(email) {
+    validateEmail(email: string) {
         return String(email)
             .toLowerCase()
             .match(
@@ -48,7 +46,7 @@ module.exports = {
             );
     },
 
-    calcHash(somestring) {
+    calcHash(somestring: string) {
         return crypto
             .createHash("md5")
             .update(somestring)

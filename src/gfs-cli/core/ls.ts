@@ -1,8 +1,13 @@
-const GdriveFS = require("../../gdrive-fs");
-const utils = require("../../lib/utils");
-const ora = require("ora");
+import GdriveFS, { Messages } from "../../gdrive-fs";
+import utils from "../../lib/utils";
+import ora from "ora";
 
-module.exports = async function (gfs, source, option, debug) {
+module.exports = async function (
+    gfs: GdriveFS,
+    source: string,
+    option: any,
+    debug: boolean
+) {
     debug && console.log(">>", "Fetching files for path ", source);
 
     if (!utils.isValidGfsPath(source))
@@ -13,18 +18,18 @@ module.exports = async function (gfs, source, option, debug) {
     if (option.weblink) {
         const spinner = ora("Fetching..").start();
         const { status, files } = await gfs.list(source);
-        if (status == GdriveFS.OK && files[0]["webViewLink"])
+        if (status == Messages.OK && files)
             return spinner.succeed(files[0]["webViewLink"]);
         else return spinner.fail(`Invalid file path.`);
     }
 
     const spinner = ora("Fetching..").start();
-    const { status, files } = await gfs.list(source, true);
+    const { status, files } = await gfs.list(source);
     spinner.stop();
 
     const table = utils.table(["Name", "Type", "Size", "Last Modified"]);
 
-    if (status == GdriveFS.OK) {
+    if (status == Messages.OK && files) {
         files.forEach((file) =>
             table.push([
                 file.name,
@@ -35,7 +40,7 @@ module.exports = async function (gfs, source, option, debug) {
         );
         console.log(table.toString());
         console.log(" Total Files: ", files.length, "\n");
-    } else if (status == GdriveFS.NOT_FOUND) {
+    } else if (status == Messages.NOT_FOUND) {
         console.log("Directory is Empty");
     } else {
         console.log("error:", status);

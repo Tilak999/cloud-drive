@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 
-const GdriveFS = require("../gdrive-fs");
-const path = require("path");
-const { program } = require("commander");
-const fs = require("fs");
+import GdriveFS from "../gdrive-fs";
+import path from "path";
+import { program } from "commander";
+import fs from "fs";
 
 let debug = false;
-let keyFilePath = path.resolve(process.env.HOME, "./.gfs/masterKey.json");
+let keyFilePath = path.resolve(
+    process.env.HOME || __dirname,
+    "./.gfs/masterKey.json"
+);
 
 function main() {
     program.version("0.0.1");
@@ -14,9 +17,7 @@ function main() {
 
     if (!process.env.GFS_KEY_FILE && !fs.existsSync(keyFilePath)) {
         return console.error(
-            "Abort: Neither key file at " +
-                keyFilePath +
-                " is present nor GFS_KEY_FILE env variable is not set."
+            `Abort: Neither key file at ${keyFilePath} is present nor GFS_KEY_FILE env variable is not set.`
         );
     } else {
         if (process.env.GFS_KEY_FILE) {

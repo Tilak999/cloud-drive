@@ -1,16 +1,21 @@
-const GdriveFS = require("../../gdrive-fs");
-const utils = require("../../lib/utils");
-const fs = require("fs");
-const path = require("path");
-const ora = require("ora");
+import GdriveFS, { Messages } from "../../gdrive-fs";
+import utils from "../../lib/utils";
+import fs from "fs";
+import path from "path";
+import ora from "ora";
 
 const spinner = ora("Fetching file(s)..");
 
-async function downloadDirectory(gfs, source, destination, debug) {
+async function downloadDirectory(
+    gfs: GdriveFS,
+    source: string,
+    destination: string,
+    debug: boolean
+) {
     debug && console.log("> Iterating dir.. ", source);
     fs.mkdirSync(destination);
-    const result = await gfs.list(source, true);
-    if (result.status == GdriveFS.OK) {
+    const result = await gfs.list(source);
+    if (result.status == Messages.OK && result.files) {
         result.files.forEach(async (file) => {
             if (file.isDirectory) {
                 spinner.stopAndPersist({
@@ -27,7 +32,12 @@ async function downloadDirectory(gfs, source, destination, debug) {
     }
 }
 
-async function downloadFile(gfs, source, destination, debug) {
+async function downloadFile(
+    gfs: GdriveFS,
+    source: string,
+    destination: string,
+    debug: boolean
+) {
     debug && console.log("> Downloading file.. ", source);
     const filename = path.basename(source);
     const filepath = path.join(destination, filename);
@@ -35,21 +45,33 @@ async function downloadFile(gfs, source, destination, debug) {
     spinner.start(`[Downloading] ${filename}`);
     const result = await gfs.downloadFile(source);
 
-    const stream = fs.createWriteStream(filepath);
-    let receivedLength = 0;
-    result.data.on("data", (chunk) => {
-        stream.write(chunk);
-        receivedLength += chunk.length;
-        const percentage = ((receivedLength / result.length) * 100).toFixed(2);
-        spinner.text = `[Progress ${percentage}%] ${filename}`;
-    });
-    result.data.on("end", () => {
-        spinner.stopAndPersist({ symbol: "✔ " });
-        stream.end();
-    });
+    if (result.data) {
+        const stream = fs.createWriteStream(filepath);
+        let receivedLength = 0;
+        result.data.on("data", (chunk) => {
+            stream.write(chunk);
+            receivedLength += chunk.length;
+            const percentage = ((receivedLength / result.length) * 100).toFixed(
+                2
+            );
+            spinner.text = `[Progress ${percentage}%] ${filename}`;
+        });
+        result.data.on("end", () => {
+            spinner.stopAndPersist({ symbol: "✔ " });
+            stream.end();
+        });
+    } else {
+        spinner.stop();
+        console.error("Failed to read download stream");
+    }
 }
 
-module.exports = async function (gfs, source, destination, debug) {
+module.exports = async function (
+    gfs: GdriveFS,
+    source: string,
+    destination: string,
+    debug: boolean
+) {
     if (!utils.isValidGfsPath(source))
         return console.error(
             "error: Invalid source path, must start with gfs:/"
@@ -63,11 +85,11 @@ module.exports = async function (gfs, source, destination, debug) {
 
     spinner.start();
     const resp = await gfs.list(source);
-    if (resp.status == GdriveFS.OK && resp.files.length > 0) {
-        const entity = resp.files[0];
-        if (entity.isDirectory) {
+    const files = resp.files || [];
+    if (resp.status == Messages.OK && files.length > 0) {
+        if (files[0].isDirectory) {
             debug && console.log(">> directory download..");
-            destination = path.join(destination, entity.name);
+            destination = path.join(destination, files[0].name);
             await downloadDirectory(gfs, source, destination, debug);
             //spinner.succeed("Download completed");
         } else {

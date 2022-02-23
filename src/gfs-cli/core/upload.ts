@@ -1,18 +1,23 @@
-const GdriveFS = require("../../gdrive-fs");
-const utils = require("../../lib/utils");
-const ora = require("ora");
-const fs = require("fs");
-const path = require("path");
+import GdriveFS, { Messages } from "../../gdrive-fs";
+import utils from "../../lib/utils";
+import ora from "ora";
+import fs from "fs";
+import path from "path";
 
 const spinner = ora("Calculating ..");
 
-async function uploadDirectory(gfs, source, destination, debug) {
+async function uploadDirectory(
+    gfs: GdriveFS,
+    source: string,
+    destination: string,
+    debug: boolean
+) {
     debug && console.log("uploading dir:", source);
     spinner.start("Uploading: " + source);
     const dirName = path.basename(source);
     const resp = await gfs.createDirectory(destination, dirName);
 
-    if (resp.status == GdriveFS.OK) {
+    if (resp.status == Messages.OK) {
         const entities = fs.readdirSync(source).map((name) => {
             const filesource = path.join(source, name);
             const filedestination = path.join(destination, dirName);
@@ -24,7 +29,7 @@ async function uploadDirectory(gfs, source, destination, debug) {
             };
         });
 
-        for (entity of entities) {
+        for (const entity of entities) {
             if (entity.isDirectory)
                 await uploadDirectory(
                     gfs,
@@ -40,7 +45,12 @@ async function uploadDirectory(gfs, source, destination, debug) {
     }
 }
 
-async function uploadFile(gfs, source, destination, debug) {
+async function uploadFile(
+    gfs: GdriveFS,
+    source: string,
+    destination: string,
+    debug: boolean
+) {
     debug && console.log("uploading file:", source);
     const filename = path.basename(source);
     const stat = fs.statSync(source);
@@ -60,7 +70,12 @@ async function uploadFile(gfs, source, destination, debug) {
     });
 }
 
-module.exports = async function (gfs, source, destination, debug) {
+module.exports = async function (
+    gfs: GdriveFS,
+    source: string,
+    destination: string,
+    debug: boolean
+) {
     debug && console.log(">>", "Uploading files/directory.. ", destination);
 
     if (!utils.isValidGfsPath(destination))

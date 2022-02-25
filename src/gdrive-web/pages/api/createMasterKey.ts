@@ -1,6 +1,6 @@
 import db from "@lib/db";
 import Cookies from "cookies";
-import { calcHash } from "@lib/utils";
+import { calcHash } from "@dist/lib/utils";
 
 export default async function createMasterKey(req, res) {
     const { email, password, key } = req.body;

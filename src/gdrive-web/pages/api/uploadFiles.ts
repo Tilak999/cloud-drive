@@ -47,14 +47,23 @@ apiRoute.post(async (req: NextApiRequestWithFile, res: NextApiResponse) => {
     const gfs = await getGFS(cookie.get("token"));
     try {
         for (const file of req.files) {
-            console.log(`Uploading.. ${file.filename}`);
+            console.log(`createPathIfNotExist.. ${file.filename}`);
             const filepath = path.join(file.destination, file.filename);
             await createPathIfNotExist(gfs, req.body.path);
-            await gfs.uploadFile(req.body.path, fs.createReadStream(filepath), {
-                filename: file.filename,
-                filesize: file.size,
-                onUploadProgress: (e) => {},
-            });
+            try {
+                console.log(`Uploading.. ${file.filename}`);
+                await gfs.uploadFile(
+                    req.body.path,
+                    fs.createReadStream(filepath),
+                    {
+                        filename: file.filename,
+                        filesize: file.size,
+                        onUploadProgress: (e) => {},
+                    }
+                );
+            } catch (e) {
+                console.error(e);
+            }
             fs.rm(filepath, () => console.log("file removed"));
             console.log(`File uploaded to gdrive: ${file.filename}`);
         }

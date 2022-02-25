@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { humanFileSize } from "@lib/utils";
+import { humanFileSize } from "@dist/lib/utils";
 
 import notify from "@lib/notify";
 import Modal from "@components/Modal";

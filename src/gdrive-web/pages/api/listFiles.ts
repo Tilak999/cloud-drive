@@ -11,7 +11,11 @@ export default async function listFiles(req, res) {
     const response = {
         files: [
             ...files.filter((f) => f.mimeType.endsWith("folder")),
-            ...files.filter((f) => !f.mimeType.endsWith("folder")),
+            ...files
+                .filter((f) => !f.mimeType.endsWith("folder"))
+                .sort(function (a, b) {
+                    return ("" + a.name).localeCompare(b.name);
+                }),
         ],
     };
 

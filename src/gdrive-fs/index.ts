@@ -60,6 +60,7 @@ function normaliseFileData(file: any) {
 }
 
 function getAbsolutePath(inputPath: string) {
+    inputPath = inputPath.replace(/'/g, "\\'");
     if (inputPath.indexOf(GFS_METADATA_ROOT_DIR) == -1) {
         return inputPath
             .replace(GFS_PREFIX, GFS_METADATA_ROOT_DIR)
@@ -173,8 +174,10 @@ export default class GdriveFS {
         const absPath = getAbsolutePath(path);
         const auth = await this.authorize(this._indexAuth);
         const fields = `files(mimeType, id, name, size, modifiedTime, description, parents)`;
-        const q = `name='${absPath}'`;
+        const q = `description contains '${absPath}'`;
         const resp = await drive.files.list({ auth, fields, q });
+
+        console.log(resp.data);
 
         if (resp.data != null && resp.data.files != null) {
             const fileCount = resp.data.files.length;
@@ -219,10 +222,10 @@ export default class GdriveFS {
             const resp = await drive.files.create({
                 auth,
                 requestBody: {
-                    originalFilename: dirName,
-                    name: absPath,
+                    name: dirName,
+                    description: absPath,
                     mimeType: MIME_TYPE_DIRECTORY,
-                    parents: [parentDir.data.symlinkId || metadata.id],
+                    parents: [parentDir.data.id || metadata.id],
                 },
             });
             return {

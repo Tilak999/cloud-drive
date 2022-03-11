@@ -6,7 +6,7 @@
         "gfs": "./dist/src/gfs-cli/index.js"
     },
     "scripts": {
-        "generateKey": "node ./src/generateMasterKey.js",
+        "generateKey": "node ./src/tools/generateMasterKey.js",
         "dev": "next dev ./src/gdrive-web",
         "build": "tsc && next build ./src/gdrive-web",
         "build-web": "next build ./src/gdrive-web",

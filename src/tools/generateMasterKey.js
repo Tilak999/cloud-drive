@@ -1,10 +1,10 @@
-const exec = require("./lib/exec");
-const mergeKeys = require("./lib/mergeKeys");
+const mergeKeys = require("../lib/mergeKeys");
 const path = require("path");
 const child_process = require("child_process");
 
 const randomNumber = (Math.random() * 1000).toFixed(0);
 const projectId = process.argv[2] || `cloud-drive-${randomNumber}`;
+const totalAccounts = parseInt(process.argv[3]) || 98
 const debugLogs = process.argv.indexOf("--debug") > -1;
 
 function exec(command) {
@@ -47,7 +47,7 @@ async function createServiceAccount(uid, projectId) {
     const commands = [
         `gcloud iam service-accounts create ${serviceAccountName} --display-name="Service account ${uid} --project ${projectId}"`,
         `gcloud projects add-iam-policy-binding ${projectId} --member="serviceAccount:${serviceAccountName}@${projectId}.iam.gserviceaccount.com" --role="roles/owner"`,
-        `gcloud iam service-accounts keys create ./keys/${projectId}-${serviceAccountName}.json --iam-account=${serviceAccountName}@${projectId}.iam.gserviceaccount.com`,
+        `gcloud iam service-accounts keys create ${path.join(__dirname, "keys", projectId)}-${serviceAccountName}.json --iam-account=${serviceAccountName}@${projectId}.iam.gserviceaccount.com`,
     ];
     for (const command of commands) {
         const out = await exec(command);
@@ -68,9 +68,9 @@ async function main() {
         await setProject(projectId);
 
         console.log(
-            `> Creating Service Accounts.. this might take few minutes`
+            `> Creating Service Accounts.. this might take time, grab a coffee or take a break!`
         );
-        for (let i = 0; i < 98; i++) {
+        for (let i = 0; i < totalAccounts; i++) {
             console.log(`> Creating Service Accounts:`, i);
             await createServiceAccount(i, projectId);
         }
@@ -82,7 +82,7 @@ async function main() {
         );
         console.log(
             `> Find the master key present at:`,
-            path(__dirname, "masterKey.json")
+            path.join(__dirname, "masterKey.json")
         );
     } catch (e) {
         console.error("error", e);

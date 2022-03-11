@@ -1,4 +1,5 @@
 import GDriveFS from "../gdrivefs_2.0";
+import fs from "fs";
 
 // id:1ADPskv4IVuCMpyBZtotryb_mGT1QAWHO
 const drive = new GDriveFS({
@@ -6,4 +7,14 @@ const drive = new GDriveFS({
     enableDebugLogs: true,
 });
 
-drive.getFilesAndFolders();
+drive.getStorageInfo().then(console.log);
+//drive.getFilesAndFolders().then(console.log);
+//drive.createFolder("series").then(console.log);
+
+const source = "C:\\Users\\TSL4\\Documents\\cloud-drive\\README.md";
+const stat = fs.statSync(source);
+drive.uploadFile(fs.readFileSync(source), {
+    name: "readme.md",
+    size: stat.size,
+    progress: console.log,
+});

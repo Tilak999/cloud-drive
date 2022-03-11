@@ -1,6 +1,6 @@
 export interface FileConfig {
     name: string;
     size: number;
-    progress?: () => {};
-    parentId: string;
+    progress?: (progressEvent: any) => void;
+    parentId?: string;
 }

@@ -1,4 +1,6 @@
 import { google } from "googleapis";
+import { Stream } from "stream";
+import { FileConfig } from "./types";
 const drive = google.drive("v3");
 
 const MIME_TYPE_DIRECTORY = "application/vnd.google-apps.folder";
@@ -21,6 +23,14 @@ class GDriveFS {
         });
     }
 
+    async getRootDir() {
+        if (this._rootDirectory != "") return this._rootDirectory;
+        else {
+            const id: string = await this.getOrCreateRootDirectory();
+            return id;
+        }
+    }
+
     private log(...args: any[]) {
         this._enableDebugLogs && console.log("[grive-fs]", ...args);
     }
@@ -36,7 +46,7 @@ class GDriveFS {
         return await auth.getClient();
     }
 
-    async getOrCreateRootDirectory() {
+    private async getOrCreateRootDirectory() {
         const auth = await this.authorize(this._indexAuth);
         const { data } = await drive.files.list({
             auth,
@@ -65,6 +75,15 @@ class GDriveFS {
         }
     }
 
+    async checkIfObjectExist(parent: string, name: string) {
+        const auth = await this.authorize(this._indexAuth);
+        const { data } = await drive.files.list({
+            auth,
+            q: `'${parent}' in parents AND name='${name}'`,
+        });
+        return { exist: data != null ? true : false, data };
+    }
+
     private async list(id: string) {
         const auth = await this.authorize(this._indexAuth);
         try {
@@ -79,99 +98,157 @@ class GDriveFS {
         }
     }
 
-    getFilesAndFolders(parentId?: string) {
-        if (parentId == null || parentId == "") parentId = this._rootDirectory;
+    async getFilesAndFolders(parentId?: string) {
+        if (parentId == null || parentId == "") {
+            parentId = await this.getRootDir();
+        }
         return this.list(parentId);
     }
 
-    createFolder(folderName: string, parentId?: string) {
-        if(parentId == null || parentId == "") parentId = this._rootDirectory;
-        if(folderName == null || folderName == "") throw "Invalid folder name";
-        const { data } = await drive.files.create({
+    async createFolder(folderName: string, parentId?: string) {
+        if (folderName == null || folderName == "") throw "Invalid folder name";
+        if (parentId == null || parentId == "") {
+            parentId = await this.getRootDir();
+        }
+        const resp = await this.checkIfObjectExist(parentId, folderName);
+        if (!resp.exist) {
+            const { data } = await drive.files.create({
+                auth: await this.authorize(this._indexAuth),
+                requestBody: {
+                    name: folderName,
+                    mimeType: MIME_TYPE_DIRECTORY,
+                    parents: [parentId],
+                },
+            });
+            this.log(`Folder created: ${folderName} at id:${parentId}`);
+            return data;
+        } else {
+            throw "Folder already exist";
+        }
+    }
+
+    private setPermission(auth: any, fileId: string, email: string) {
+        return drive.permissions.create({
             auth,
             requestBody: {
-                name: folderName,
-                mimeType: MIME_TYPE_DIRECTORY,
-                parents: [parentId],
+                type: "users",
+                role: "reader",
+                emailAddress: email,
             },
+            fileId,
+            fields: "*",
         });
-        this.log(`Folder created: ${folderName} at id:${parentId}`)
-        return data;
+    }
+
+    private upload(config: any) {
+        const payload = {
+            auth: config.auth,
+            fields: "*",
+            media: { body: config.file },
+            requestBody: {
+                name: `${config.parent}/${config.name}`,
+            },
+        };
+        return drive.files.create(payload, {
+            onUploadProgress: config.progress,
+        });
+    }
+
+    async getStorageInfo(serviceAuth?: any) {
+        const action = async (serviceAuth: any) => {
+            const auth = await this.authorize(serviceAuth);
+            const resp = await drive.about.get({
+                auth,
+                fields: "storageQuota",
+            });
+            const storageInfo = resp.data.storageQuota;
+            if (storageInfo != null) {
+                const { limit, usage, usageInDrive } = storageInfo;
+                return {
+                    limit: parseFloat(limit || "0"),
+                    usage: parseFloat(usage || "0"),
+                    usageInDrive: parseFloat(usageInDrive || "0"),
+                };
+            } else {
+                throw `Failed to fetch storage information for service account ${serviceAuth.client_email}`;
+            }
+        };
+        if (serviceAuth) return action(serviceAuth);
+        const promises = Object.keys(this._keyFile).map((serviceAccountName) =>
+            action(this._keyFile[serviceAccountName])
+        );
+        const info = await Promise.all(promises);
+        return info.reduce((prev, curr) => {
+            return {
+                limit: prev.limit + curr.limit,
+                usage: prev.usage + curr.usage,
+                usageInDrive: prev.usageInDrive + curr.usageInDrive,
+            };
+        });
     }
 
     private validate(config: FileConfig) {
-        if(config.name == null || config.name == ""){
-            throw "File name is required."
+        if (config.name == null || config.name == "") {
+            throw "File name is required.";
         }
-        if(config.size == null || config.size == ""){
-            throw "File size is required."
+        if (config.size == null) {
+            throw "File size is required.";
         }
     }
 
-    uploadFile(filestream: Stream, config: FileConfig) {
-        validate(config)
-        const parent = config.parentId || this._rootDirectory;
+    async uploadFile(filestream: Buffer, config: FileConfig) {
+        this.validate(config);
+        const parent = config.parentId || (await this.getRootDir());
+        const email = this._indexAuth.client_email;
         for (const serviceAccountName of Object.keys(this._keyFile)) {
-            if (this._indexAuth.client_email.startsWith(serviceAccountName)) {
-                continue;
-            }
+            if (email.startsWith(serviceAccountName)) continue;
             const serviceAccountAuth = this._keyFile[serviceAccountName];
             const info = await this.getStorageInfo(serviceAccountAuth);
             const freeSpace = info.limit - info.usage;
-            if (freeSpace >= config.filesize) {
-                this.log(`Uploading to ${serviceAccountName} [free space: ${freeSpace}]`);
-                const { data } = await drive.files.create(
-                    {
-                        auth: await this.authorize(serviceAccountAuth),
-                        fields: '*',
-                        media: { body: filestream },
-                        requestBody: {
-                            name: `${parent}/${config.name}`
-                        },
-                    },
-                    {
-                        onUploadProgress: config.progress],
-                    }
+            if (freeSpace >= config.size) {
+                this.log(
+                    `Uploading [${serviceAccountName}][free space: ${freeSpace}]`
                 );
-
-                if (data == null || data.id == null) {
-                    throw `File [${config.name}] upload failed`;
-                } else {
-                    // create permission
-                    await drive.permission.create({
-                        resource:  {
-                            type: 'user',
-                            role: 'reader',
-                            emailAddress: this._indexAuth.client_email
-                          }, 
-                          fileId: data.id,
-                          fields: '*'
-                    })
-                     // Create symbolic file in metadata directory
-                     const resource = {
-                        name: config.filename,
-                        mimeType: MIME_TYPE_LINK,
-                        description: JSON.stringify({
-                            serviceAccountName,
-                            mimeType: data.mimeType,
-                            fileSize: data.size,
-                            webViewLink: data.webViewLink,
-                        }),
-                        shortcutDetails: { targetId: data.id },
-                        parents: [parent]
-                    };
-                    const symlinkResp = await drive.files.create({
-                        auth: await this.authorize(this._indexAuth),
-                        requestBody: resource,
-                        fields,
-                    });
-                    return {
-                        status: Messages.OK,
-                        data: normaliseFileData(symlinkResp.data),
-                    };
+                const auth = await this.authorize(serviceAccountAuth);
+                const response = await this.upload({
+                    auth,
+                    file: filestream,
+                    parent,
+                    name: config.name,
+                    progress: config.progress,
+                });
+                if (response.data != null && response.data.id != null) {
+                    const fileid = response.data.id;
+                    this.setPermission(auth, fileid, email);
+                    const description = JSON.stringify(response.data);
+                    this.createShortcut(
+                        config.name,
+                        fileid,
+                        parent,
+                        description
+                    );
                 }
             }
         }
+    }
+
+    private async createShortcut(
+        name: string,
+        fileid: string,
+        parent: string,
+        description: string
+    ) {
+        const shortcutMetadata = {
+            auth: await this.authorize(this._indexAuth),
+            name,
+            mimeType: MIME_TYPE_LINK,
+            description,
+            shortcutDetails: {
+                targetId: fileid,
+            },
+            parent: [parent],
+        };
+        return drive.files.create(shortcutMetadata);
     }
 }
 

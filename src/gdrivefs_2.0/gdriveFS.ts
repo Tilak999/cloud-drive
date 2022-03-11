@@ -2,7 +2,7 @@ import { google } from "googleapis";
 const drive = google.drive("v3");
 
 const MIME_TYPE_DIRECTORY = "application/vnd.google-apps.folder";
-const MIME_TYPE_LINK = "application/vnd.drive-fs.symlink";
+const MIME_TYPE_LINK = "application/vnd.google-apps.shortcut";
 
 class GDriveFS {
     private _keyFile: any;
@@ -99,8 +99,79 @@ class GDriveFS {
         return data;
     }
 
+    private validate(config: FileConfig) {
+        if(config.name == null || config.name == ""){
+            throw "File name is required."
+        }
+        if(config.size == null || config.size == ""){
+            throw "File size is required."
+        }
+    }
+
     uploadFile(filestream: Stream, config: FileConfig) {
-        config.
+        validate(config)
+        const parent = config.parentId || this._rootDirectory;
+        for (const serviceAccountName of Object.keys(this._keyFile)) {
+            if (this._indexAuth.client_email.startsWith(serviceAccountName)) {
+                continue;
+            }
+            const serviceAccountAuth = this._keyFile[serviceAccountName];
+            const info = await this.getStorageInfo(serviceAccountAuth);
+            const freeSpace = info.limit - info.usage;
+            if (freeSpace >= config.filesize) {
+                this.log(`Uploading to ${serviceAccountName} [free space: ${freeSpace}]`);
+                const { data } = await drive.files.create(
+                    {
+                        auth: await this.authorize(serviceAccountAuth),
+                        fields: '*',
+                        media: { body: filestream },
+                        requestBody: {
+                            name: `${parent}/${config.name}`
+                        },
+                    },
+                    {
+                        onUploadProgress: config.progress],
+                    }
+                );
+
+                if (data == null || data.id == null) {
+                    throw `File [${config.name}] upload failed`;
+                } else {
+                    // create permission
+                    await drive.permission.create({
+                        resource:  {
+                            type: 'user',
+                            role: 'reader',
+                            emailAddress: this._indexAuth.client_email
+                          }, 
+                          fileId: data.id,
+                          fields: '*'
+                    })
+                     // Create symbolic file in metadata directory
+                     const resource = {
+                        name: config.filename,
+                        mimeType: MIME_TYPE_LINK,
+                        description: JSON.stringify({
+                            serviceAccountName,
+                            mimeType: data.mimeType,
+                            fileSize: data.size,
+                            webViewLink: data.webViewLink,
+                        }),
+                        shortcutDetails: { targetId: data.id },
+                        parents: [parent]
+                    };
+                    const symlinkResp = await drive.files.create({
+                        auth: await this.authorize(this._indexAuth),
+                        requestBody: resource,
+                        fields,
+                    });
+                    return {
+                        status: Messages.OK,
+                        data: normaliseFileData(symlinkResp.data),
+                    };
+                }
+            }
+        }
     }
 }
 

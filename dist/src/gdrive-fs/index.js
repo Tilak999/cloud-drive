@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Messages = void 0;
-const utils_1 = require("../lib/utils");
+const utils_1 = __importDefault(require("../lib/utils"));
 const path_1 = __importDefault(require("path"));
 const googleapis_1 = require("googleapis");
 const drive = googleapis_1.google.drive("v3");
@@ -42,7 +42,6 @@ function normaliseFileData(file) {
     return Object.assign(Object.assign(Object.assign({}, file), additionalFields), metadata);
 }
 function getAbsolutePath(inputPath) {
-    inputPath = inputPath.replace(/'/g, "\\'");
     if (inputPath.indexOf(GFS_METADATA_ROOT_DIR) == -1) {
         return inputPath
             .replace(GFS_PREFIX, GFS_METADATA_ROOT_DIR)
@@ -157,9 +156,8 @@ class GdriveFS {
             const absPath = getAbsolutePath(path);
             const auth = yield this.authorize(this._indexAuth);
             const fields = `files(mimeType, id, name, size, modifiedTime, description, parents)`;
-            const q = `description contains '${absPath}'`;
+            const q = `name='${absPath}'`;
             const resp = yield drive.files.list({ auth, fields, q });
-            console.log(resp.data);
             if (resp.data != null && resp.data.files != null) {
                 const fileCount = resp.data.files.length;
                 if (includeData && fileCount > 0) {
@@ -195,10 +193,10 @@ class GdriveFS {
                 const resp = yield drive.files.create({
                     auth,
                     requestBody: {
-                        name: dirName,
-                        description: absPath,
+                        originalFilename: dirName,
+                        name: absPath,
                         mimeType: MIME_TYPE_DIRECTORY,
-                        parents: [parentDir.data.id || metadata.id],
+                        parents: [parentDir.data.symlinkId || metadata.id],
                     },
                 });
                 return {
@@ -403,7 +401,7 @@ class GdriveFS {
         return __awaiter(this, void 0, void 0, function* () {
             if (!source || !target)
                 throw "Parameters required ($source, $target)";
-            if (!(0, utils_1.isValidGfsPath)(source) || !(0, utils_1.isValidGfsPath)(target))
+            if (!utils_1.default.isValidGfsPath(source) || !utils_1.default.isValidGfsPath(target))
                 throw `Invalid gfs:/.. path: [${source},${target}]`;
             if (source == target)
                 throw `Source and target can't be same: [${source},${target}]`;
@@ -440,7 +438,7 @@ class GdriveFS {
         });
     }
     _validateGfsPath(filePath) {
-        if (!(0, utils_1.isValidGfsPath)(filePath))
+        if (!utils_1.default.isValidGfsPath(filePath))
             throw "Invalid gfs:/.. path: " + filePath;
     }
     _listAllFiles() {

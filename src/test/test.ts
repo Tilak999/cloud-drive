@@ -1,10 +1,9 @@
-import GdriveFS from "../gdrive-fs";
+import GDriveFS from "../gdrivefs_2.0";
 
-const gfs = new GdriveFS({ masterKeyFile: require("../../masterKey.json") });
+// id:1ADPskv4IVuCMpyBZtotryb_mGT1QAWHO
+const drive = new GDriveFS({
+    masterKeyFile: require("../../masterKey.json"),
+    enableDebugLogs: true,
+});
 
-async function main() {
-    //await gfs.createDirectory("gfs:/", "test-dir");
-    await gfs.checkIfEntityExist("gfs:/test-dir");
-}
-
-main();
+drive.getFilesAndFolders();

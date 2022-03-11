@@ -6,9 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.calcHash = exports.validateEmail = exports.humanFileSize = exports.table = exports.isValidGfsPath = void 0;
 const cli_table_1 = __importDefault(require("cli-table"));
 const crypto_1 = __importDefault(require("crypto"));
-function isValidGfsPath(path) {
+const isValidGfsPath = (path) => {
     return path && path.startsWith("gfs:/");
-}
+};
 exports.isValidGfsPath = isValidGfsPath;
 function table(head) {
     const chars = {
@@ -54,5 +54,9 @@ function calcHash(somestring) {
 }
 exports.calcHash = calcHash;
 exports.default = {
-    isValidGfsPath, calcHash, validateEmail, humanFileSize, table
+    isValidGfsPath: exports.isValidGfsPath,
+    calcHash,
+    validateEmail,
+    humanFileSize,
+    table,
 };

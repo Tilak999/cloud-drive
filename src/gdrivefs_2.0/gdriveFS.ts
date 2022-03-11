@@ -83,6 +83,25 @@ class GDriveFS {
         if (parentId == null || parentId == "") parentId = this._rootDirectory;
         return this.list(parentId);
     }
+
+    createFolder(folderName: string, parentId?: string) {
+        if(parentId == null || parentId == "") parentId = this._rootDirectory;
+        if(folderName == null || folderName == "") throw "Invalid folder name";
+        const { data } = await drive.files.create({
+            auth,
+            requestBody: {
+                name: folderName,
+                mimeType: MIME_TYPE_DIRECTORY,
+                parents: [parentId],
+            },
+        });
+        this.log(`Folder created: ${folderName} at id:${parentId}`)
+        return data;
+    }
+
+    uploadFile(filestream: Stream, config: FileConfig) {
+        config.
+    }
 }
 
 export default GDriveFS;

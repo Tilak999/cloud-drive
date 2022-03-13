@@ -3,15 +3,33 @@ const btnGroup = {
         icon: "bi-folder-plus",
         tip: "Create New Folder",
         action: "new_folder",
+        text: null,
     },
-    cut: { icon: "bi-scissors", tip: "Cut File or Folder", action: "cut" },
-    delete: { icon: "bi-trash", tip: "Delete File or Folder", action: "trash" },
-    upload: { icon: "bi-arrow-bar-up", text: "Upload", action: "upload" },
+    move: {
+        icon: "bi-scissors",
+        tip: "Cut File or Folder",
+        action: "cut",
+        text: null,
+    },
+    delete: {
+        icon: "bi-trash",
+        tip: "Delete File or Folder",
+        action: "trash",
+        text: null,
+    },
+    upload: {
+        icon: "bi-arrow-bar-up",
+        text: "Upload",
+        action: "upload",
+        tip: "upload",
+    },
 };
+
+type ButtonType = "createFolder" | "move" | "delete" | "upload";
 
 interface propType {
     disabled?: boolean;
-    type: any;
+    type: ButtonType;
     onClick: (e: any) => void;
 }
 

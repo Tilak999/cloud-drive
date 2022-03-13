@@ -4,20 +4,13 @@ import getGFS from "@lib/gdrive";
 export default async function listFiles(req, res) {
     const cookie = new Cookies(req, res);
     const gfs = await getGFS(cookie.get("token"));
-    const result = await gfs.list(req.body?.path || "gfs:/", true);
-
-    const files = result.files || [];
-
-    const response = {
-        files: [
-            ...files.filter((f) => f.mimeType.endsWith("folder")),
-            ...files
-                .filter((f) => !f.mimeType.endsWith("folder"))
-                .sort(function (a, b) {
-                    return ("" + a.name).localeCompare(b.name);
-                }),
-        ],
-    };
-
-    res.status(200).json(response);
+    if (req.body.folderId == "root") {
+        console.log("-> Fetching root contents");
+        const data = await gfs.getFilesAndFolders();
+        res.status(200).json(data);
+    } else {
+        console.log("-> Fetching contents for: ", req.body.folderId);
+        const data = await gfs.getFilesAndFolders(req.body.folderId);
+        res.status(200).json(data);
+    }
 }

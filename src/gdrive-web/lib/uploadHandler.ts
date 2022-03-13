@@ -21,7 +21,7 @@ export default async function uploadFile(item) {
         loaded: 0,
         total: item.file.size,
         file: item.file,
-        directoryPath: item.directoryPath,
+        directoryId: item.directoryId,
     });
     if (!isRunning) {
         isRunning = true;
@@ -33,12 +33,12 @@ export default async function uploadFile(item) {
 
 async function performUploads() {
     while (upload_queue.length > 0) {
-        const { file, directoryPath } = upload_queue.pop();
-        const filename = file.name;
-        const basePath = file.webkitRelativePath.replace("/" + filename, "");
+        const { file, directoryId } = upload_queue.pop();
+        const relativePath = file.webkitRelativePath;
         const formdata = new FormData();
         formdata.set("files", file);
-        formdata.set("path", path.join(directoryPath, basePath));
+        formdata.set("relativePath", relativePath);
+        formdata.set("directoryId", directoryId);
         await axios.post("/api/uploadFiles", formdata, {
             onUploadProgress: (progress) => {
                 console.log(progress);

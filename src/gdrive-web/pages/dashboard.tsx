@@ -1,76 +1,79 @@
 import axios from "axios";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import FileTree from "@components/filetree";
+import FileList from "@components/FileList";
 import Header from "@components/header";
-import FileView from "@components/FileView";
-import { useRouter } from "next/dist/client/router";
+import Breadcrumb from "@components/Breadcrumb";
+import CreateFolderAction from "@components/CreateFolderAction";
+import DeleteAction from "@components/DeleteAction";
+import UploadAction from "@components/UploadAction";
 
-function HomePage() {
-    const home = {
-        name: "Home",
-        path: "gfs:/",
-    };
-    const [filetree, setFiletree] = useState([]);
-    const [selectedFolder, setSelectedFolder] = useState(home);
+export default function Folder() {
     const router = useRouter();
+    const [items, setItems] = useState(null);
+    const [currentPath, setCurrentPath] = useState(["Home"]);
+    const [selected, setSelection] = useState([]);
+    const url = "/api/listFiles";
 
-    const fetchFiles = async (nodeId?: any) => {
-        if (filetree.length == 0 || nodeId == null) {
-            const { data } = await axios.post("/api/listFiles");
-            setFiletree(data.files);
-        } else {
-            const items = nodeId.split(",");
-            let target: any = filetree;
-            for (let i of items) {
-                target = target[i] || target.childrens[i];
-            }
-            if (target.childrens != null) {
-                target["childrens"] = null;
-                setFiletree([...filetree]);
+    const loadFiles = () => {
+        const folderId = router.query.folderId || "root";
+        if (router.query.path && typeof router.query.path == "string")
+            setCurrentPath(router.query.path.split("/"));
+        setItems(null);
+        axios.post(url, { folderId }).then(({ data }) => {
+            if (data) {
+                setItems(data);
             } else {
-                target["loading"] = true;
-                setFiletree([...filetree]);
-                const { data } = await axios.post("/api/listFiles", {
-                    path: target.path,
-                });
-                target["childrens"] = data.files;
-                target["loading"] = false;
-                setFiletree([...filetree]);
+                console.log("Directory is empty, id:");
             }
-        }
+        });
     };
 
-    useEffect(() => {
-        fetchFiles().catch(() => router.replace("/"));
-    }, []);
+    const folderSelected = (id: string, name: string) => {
+        const slug = `${name}:${id}`;
+        const path = `/dashboard?folderId=${id}&path=${[
+            ...currentPath,
+            slug,
+        ].join("/")}`;
+        router.push(path);
+    };
+
+    const onSelectionChange = (ids) => {
+        setSelection(ids);
+    };
+
+    useEffect(loadFiles, [router.query]);
 
     return (
-        <div className="w-full h-screen bg-gray-100 flex flex-col">
+        <div className="w-full h-screen bg-gray-200 flex flex-col">
             <div>
                 <Header title="Cloud Drive" />
             </div>
-            <div className="flex flex-row h-full">
-                <div className="bg-white flex flex-col flex-none w-72 m-2">
-                    <div className="bg-green-600 text-white px-2 py-2 rounded">
-                        <i className="bi bi-house-fill mx-2"></i>
-                        <button onClick={() => setSelectedFolder(home)}>
-                            Home
-                        </button>
-                    </div>
-                    <div className="text-gray-600 overflow-auto mr-2 my-2 flex-auto">
-                        <FileTree
-                            nodes={filetree}
-                            onExpandFolder={fetchFiles}
-                            onFolderSelection={setSelectedFolder}
-                        />
-                    </div>
+            <div className="mx-4 mt-4 flex flex-row">
+                <div className="flex-grow pt-1 pl-1">
+                    <Breadcrumb chunks={currentPath} />
                 </div>
-                <div className="bg-white flex-auto w-64 m-2">
-                    <FileView directoryNode={selectedFolder} />
+                <div>
+                    <CreateFolderAction
+                        directoryId={router.query.folderId}
+                        onCompletion={loadFiles}
+                    />
+                    <DeleteAction ids={selected} onCompletion={loadFiles} />
+                    <UploadAction
+                        directoryId={router.query.folderId}
+                        onCompletion={loadFiles}
+                    />
+                </div>
+            </div>
+            <div className="flex flex-row h-full">
+                <div className="bg-white rounded-lg overflow-auto m-3 shadow">
+                    <FileList
+                        items={items}
+                        onFolderSelection={folderSelected}
+                        onSelectionChange={onSelectionChange}
+                    />
                 </div>
             </div>
         </div>
     );
 }
-
-export default HomePage;

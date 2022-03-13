@@ -1,90 +1,80 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { humanFileSize } from "@dist/lib/utils";
+import Spinner from "./spinner";
+import Checkbox from "./Checkbox";
+import Icon from "./Icon";
+import { formatDate } from "@lib/utils";
+import { route } from "next/dist/server/router";
 
-function getDate(dateStr) {
-    const date = new Date(dateStr);
-    return (
-        (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) +
-        " " +
-        date.toLocaleString("default", { month: "short" }) +
-        ", " +
-        date.getFullYear()
-    );
+interface PropType {
+    items: any[];
+    onFolderSelection: (id: string, name: string) => void;
+    onSelectionChange: (items: string[]) => void;
 }
 
-function getIcon(mimeType) {
-    return mimeType.endsWith("folder") ? (
-        <i className="bi bi-folder-fill" />
-    ) : (
-        <i className="bi bi-file-earmark-text" />
-    );
-}
-
-function Checkbox({ onChange }) {
-    const [checked, setChecked] = useState(false);
-    return (
-        <i
-            className={"bi " + (checked ? "bi-check-square-fill" : "bi-square")}
-            onClick={() => {
-                console.log(checked);
-                onChange(!checked);
-                setChecked(!checked);
-            }}
-        ></i>
-    );
-}
-
-export default function FileList({ directory, onClick, onSelection }) {
+export default function FileList(props: PropType) {
+    const { items, onFolderSelection, onSelectionChange } = props;
     const [selectedItems, setSelection] = useState([]);
 
-    const onChange = (path, selected) => {
-        let arr;
-        if (selected) arr = [...selectedItems, path];
-        else arr = [...selectedItems.filter((val) => val != path)];
-        setSelection(arr);
-        onSelection(arr);
+    const action = (mimeType: string, id: string, name: string) => {
+        if (mimeType.includes("folder")) onFolderSelection(id, name);
+        else window.open("/api/download?id=" + id);
     };
+
+    const onCheckboxSelected = (id: string, checked: boolean) => {
+        const list = checked
+            ? [...selectedItems, id]
+            : [...selectedItems.filter((i) => i != id)];
+        setSelection(list);
+        onSelectionChange(list);
+    };
+
+    useEffect(() => setSelection([]), [items]);
 
     return (
         <table className="border-collapse w-full table-fixed">
             <thead className="border-b-2 border-gray-100 bg-gray-50">
                 <tr className="text-left font-semibold">
-                    <th className="w-16 py-1"></th>
-                    <th className="py-1">Name</th>
-                    <th className="py-1 w-28">Size</th>
-                    <th className="py-1 w-40">Create Date</th>
+                    <th className="w-16 py-2"></th>
+                    <th className="py-2">Name</th>
+                    <th className="py-2 w-28">Size</th>
+                    <th className="py-2 w-40">Create Date</th>
                 </tr>
             </thead>
             <tbody className="text-gray-600">
-                {directory.childrens.map(
-                    ({ name, fileSize, modifiedTime, path, mimeType }) => (
+                <tr>
+                    <td colSpan={4} className="text-center">
+                        <Spinner visible={items == null} text="Fetching.." />
+                    </td>
+                </tr>
+                {items &&
+                    items.map(({ id, name, modifiedTime, mimeType }) => (
                         <tr
                             className="border-b-2 border-gray-100 cursor-pointer hover:bg-green-50"
-                            key={name}
+                            key={id}
                         >
                             <td className="text-center py-2">
-                                <Checkbox onChange={(v) => onChange(path, v)} />
+                                <Checkbox
+                                    onChange={(checked) =>
+                                        onCheckboxSelected(id, checked)
+                                    }
+                                />
                             </td>
                             <td
                                 className="overflow-hidden overflow-ellipsis whitespace-nowrap pr-4"
-                                onClick={() =>
-                                    onClick({ path, name, mimeType })
-                                }
+                                onClick={() => action(mimeType, id, name)}
                             >
                                 <span className="mx-2 text-green-600">
-                                    {getIcon(mimeType)}
+                                    <Icon mimeType={mimeType} />
                                 </span>
                                 {name}
                             </td>
-                            <td className="text-sm">
-                                {fileSize ? humanFileSize(fileSize) : ""}
-                            </td>
+                            <td className="text-sm"></td>
                             <td className="px-2 text-sm">
-                                {getDate(modifiedTime)}
+                                {formatDate(modifiedTime)}
                             </td>
                         </tr>
-                    )
-                )}
+                    ))}
             </tbody>
         </table>
     );

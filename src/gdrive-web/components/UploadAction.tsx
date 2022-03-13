@@ -4,7 +4,7 @@ import FileActionBtn from "./FileActionBtn";
 import uploadFile from "../lib/uploadHandler";
 import Modal from "./Modal";
 
-export default function UploadAction({ directoryPath, onCompletion }) {
+export default function UploadAction({ directoryId, onCompletion }) {
     const inputFolder = useRef();
     const inputFile = useRef();
     const [visible, setVisible] = useState(false);
@@ -12,7 +12,7 @@ export default function UploadAction({ directoryPath, onCompletion }) {
     const uploadFiles = async (e) => {
         setVisible((v) => !v);
         for (const file of e.target.files) {
-            uploadFile({ directoryPath, file });
+            uploadFile({ directoryId, file });
         }
     };
 

@@ -5,6 +5,7 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { NextApiRequest, NextApiResponse } from "next";
+import GDriveFS from "@dist/gdriveFS";
 
 // Returns a Multer instance that provides several methods for generating
 // middleware that process files uploaded in multipart/form-data format.
@@ -24,21 +25,30 @@ const apiRoute = nextConnect({
 const uploadMiddleware = upload.array("files");
 apiRoute.use(uploadMiddleware);
 
-async function createPathIfNotExist(gfs, baseDirectory) {
-    let root = "gfs:/";
-    baseDirectory = baseDirectory.replace("gfs:/", "");
-    for (const part of baseDirectory.split("/")) {
-        const exist = await gfs.checkIfEntityExist(path.join(root, part));
-        if (!exist) {
-            console.log("creating dir: ", path.join(root, part));
-            await gfs.createDirectory(root, part);
-        }
-        root = path.join(root, part);
-    }
-}
-
 interface NextApiRequestWithFile extends NextApiRequest {
     files?: any;
+}
+
+async function getOrCreateDirectories(
+    gfs: GDriveFS,
+    directoryId: any,
+    relativePath: any
+) {
+    let parentId = directoryId;
+    if (relativePath && relativePath.trim() != "") {
+        const directories = path.parse(relativePath).dir.split("/");
+        for (const folderName of directories) {
+            const result = await gfs.checkIfObjectExist(parentId, folderName);
+            if (result.exist) {
+                parentId = result.data.id;
+            } else {
+                console.log("->", "Creating directory: ", folderName);
+                const data = await gfs.createFolder(folderName, parentId);
+                parentId = data.id;
+            }
+        }
+    }
+    return parentId;
 }
 
 // Process a POST request
@@ -47,20 +57,21 @@ apiRoute.post(async (req: NextApiRequestWithFile, res: NextApiResponse) => {
     const gfs = await getGFS(cookie.get("token"));
     try {
         for (const file of req.files) {
-            console.log(`createPathIfNotExist.. ${file.filename}`);
+            const { directoryId, relativePath } = req.body;
+            const destFolderId = await getOrCreateDirectories(
+                gfs,
+                directoryId,
+                relativePath
+            );
             const filepath = path.join(file.destination, file.filename);
-            await createPathIfNotExist(gfs, req.body.path);
             try {
                 console.log(`Uploading.. ${file.filename}`);
-                await gfs.uploadFile(
-                    req.body.path,
-                    fs.createReadStream(filepath),
-                    {
-                        filename: file.filename,
-                        filesize: file.size,
-                        onUploadProgress: (e) => {},
-                    }
-                );
+                await gfs.uploadFile(fs.createReadStream(filepath), {
+                    name: file.filename,
+                    size: file.size,
+                    progress: (e) => {},
+                    parentId: destFolderId,
+                });
             } catch (e) {
                 console.error(e);
             }

@@ -35,7 +35,7 @@ export default function signup() {
 
     return (
         <div className="bg-gray-100 flex w-full h-screen">
-            <div className="w-96 m-auto bg-white shadow-lg rounded-lg mt-28 py-6">
+            <div className="m-auto bg-white shadow-lg rounded-lg mt-28 py-6">
                 <h1 className="text-xl text-center p-2 my-3">
                     Create credentials
                 </h1>

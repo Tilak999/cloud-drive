@@ -17,5 +17,4 @@ jobs:
               with:
                   node-version: "16.x"
                   scope: "@ideabox"
-            - run: npm run build
             - run: echo "${{ secrets.NPM_TOKEN }}"

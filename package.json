@@ -2,14 +2,19 @@
     "name": "cloud-drive",
     "version": "1.0.0",
     "description": "Cloud Storage using service account",
-    "main": "main.js",
+    "main": "dist/gdriveFS",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Tilak999/cloud-drive"
+    },
     "bin": {
-        "gfs": "./src/gfs-cli/index.js"
+        "gfs": "./dist/src/gfs-cli/index.js"
     },
     "scripts": {
-        "generateKey": "node ./src/generateMasterKey.js",
+        "generateKey": "node ./src/tools/generateMasterKey.js",
         "dev": "next dev ./src/gdrive-web",
-        "build": "next build ./src/gdrive-web",
+        "build": "tsc && next build ./src/gdrive-web",
+        "build-web": "next build ./src/gdrive-web",
         "start": "next start ./src/gdrive-web",
         "lint": "next lint"
     },
@@ -20,7 +25,7 @@
         "cli-table": "^0.3.6",
         "commander": "^7.2.0",
         "cookies": "^0.8.0",
-        "googleapis": "^73.0.0",
+        "googleapis": "^95.0.0",
         "multer": "^1.4.3",
         "next": "^12.0.3",
         "next-connect": "^0.11.0",
@@ -31,8 +36,13 @@
     },
     "license": "MIT",
     "devDependencies": {
+        "@types/cli-table": "^0.3.0",
+        "@types/node": "^17.0.19",
+        "@types/pg": "^8.6.4",
+        "@types/react": "^17.0.39",
         "autoprefixer": "^10.4.0",
         "postcss": "^8.3.11",
-        "tailwindcss": "^3.0.16"
+        "tailwindcss": "^3.0.16",
+        "typescript": "^4.5.5"
     }
 }

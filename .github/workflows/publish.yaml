@@ -16,9 +16,10 @@ jobs:
               with:
                   node-version: "16.x"
                   registry-url: "https://npm.pkg.github.com"
+                  scope: '@tilak999'
             - run: npm ci
             - run: npm run build
-            - run: echo "registry=https://npm.pkg.github.com/@aaronpowell" >> .npmrc
+            - run: echo "registry=https://npm.pkg.github.com/@tilak999" >> .npmrc
             - run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

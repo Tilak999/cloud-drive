@@ -3,10 +3,10 @@ import notify from "@lib/notify";
 import { useRouter } from "next/dist/client/router";
 import { useState } from "react";
 import { validateEmail } from "@dist/lib/utils";
-import FileSelector from "@components/FileSelector"
+import FileSelector from "@components/FileSelector";
 
 export default function signup() {
-    const [key, setKey] = useState({ name: null, text: null });
+    const [key, setKey] = useState({ name: null, contents: null });
     const [message, setMessage] = useState<string>();
     const router = useRouter();
 
@@ -18,7 +18,7 @@ export default function signup() {
         if (!email || !validateEmail(email))
             return setMessage("Invalid e-mail");
         if (!password) return setMessage("Password field can't be empty");
-        if (!key.text) return setMessage("KeyFile is not selected");
+        if (!key.contents) return setMessage("KeyFile is not selected");
 
         const notif = notify().withLoading("Logging in");
         axios
@@ -66,10 +66,10 @@ export default function signup() {
                         placeholder="*******"
                     />
 
-                    <FileSelector 
+                    <FileSelector
                         className="bg-gray-100 text-gray-600 text-center p-6 my-6 rounded inline-block w-full outline-dashed outline-slate-400"
-                        onSelection={setKey}
-                        text={key.text || "Upload Master Key"}
+                        onSelection={(data) => setKey(data)}
+                        label={key.contents || "Upload Master Key"}
                     />
 
                     <div className="text-center">

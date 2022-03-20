@@ -1,12 +1,16 @@
 import { useRef } from "react";
 
 interface PropType {
-    text?: string,
-    onSelection: () => { name: string, text: string },
-    className?: string
+    label?: string;
+    onSelection: (input: { name: string; contents: string }) => void;
+    className?: string;
 }
 
-export default function FileSelector({ text, onSelection, className }:PropType) {
+export default function FileSelector({
+    label,
+    onSelection,
+    className,
+}: PropType) {
     const fileInput = useRef(null);
 
     const onFileSelected = async () => {
@@ -14,21 +18,24 @@ export default function FileSelector({ text, onSelection, className }:PropType) 
             const file = fileInput.current.files.item(0);
             onSelection({
                 name: file.name,
-                text: await file.text(),
+                contents: await file.text(),
             });
         }
     };
 
-    return <button
-        type="button"
-        className={className}
-        onClick={() => fileInput.current.click()}>
-        { text || "Upload File" }
-        <input
-            type="file"
-            className="hidden"
-            ref={fileInput}
-            onChange={onFileSelected}
-        />
-    </button>
+    return (
+        <button
+            type="button"
+            className={className}
+            onClick={() => fileInput.current.click()}
+        >
+            {label || "Upload File"}
+            <input
+                type="file"
+                className="hidden"
+                ref={fileInput}
+                onChange={onFileSelected}
+            />
+        </button>
+    );
 }

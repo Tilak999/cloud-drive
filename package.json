@@ -2,6 +2,11 @@
     "name": "cloud-drive",
     "version": "1.0.0",
     "description": "Cloud Storage using service account",
+    "main": "dist/gdriveFS",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Tilak999/cloud-drive"
+    },
     "bin": {
         "gfs": "./dist/src/gfs-cli/index.js"
     },

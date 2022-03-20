@@ -1,5 +1,5 @@
 {
-    "name": "cloud-drive",
+    "name": "@ideabox/cloud-drive",
     "version": "1.0.0",
     "description": "Cloud Storage using service account",
     "main": "dist/gdriveFS",

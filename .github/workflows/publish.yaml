@@ -1,6 +1,5 @@
 name: Publish package to GitHub Packages
 on:
-    push:
     workflow_dispatch:
     release:
         types: [created]
@@ -16,5 +15,7 @@ jobs:
             - uses: actions/setup-node@v2
               with:
                   node-version: "16.x"
-                  scope: "@ideabox"
-            - run: echo "${{ secrets.NPM_TOKEN }}"
+            - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+            - run: npm i
+            - run: npm run build
+            - run: npm publish --access public

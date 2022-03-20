@@ -1,5 +1,6 @@
 name: Publish package to GitHub Packages
 on:
+    push:
     workflow_dispatch:
     release:
         types: [created]
@@ -16,10 +17,8 @@ jobs:
               with:
                   node-version: "16.x"
                   registry-url: "https://npm.pkg.github.com"
-                  scope: "@tilak999"
-            - run: npm ci
+            - run: npm install
             - run: npm run build
-            - run: npm publish
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              
+            - uses: JS-DevTools/npm-publish@v1
+              with:
+                token: ${{ secrets.NPM_TOKEN }}

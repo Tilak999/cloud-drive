@@ -4,7 +4,7 @@ import { calcHash } from "@dist/lib/utils";
 
 export default async function createMasterKey(req, res) {
     const { email, password, key } = req.body;
-    if (!email || !password || !key || !key.text)
+    if (!email || !password || !key || !key.contents)
         return res.status(400).send("bad request");
 
     let query = await db.query(`Select * From users Where email=$1`, [email]);
@@ -13,7 +13,7 @@ export default async function createMasterKey(req, res) {
 
     const passwordHash = calcHash(password);
     const uuid = calcHash(email + password + Math.random());
-    const keyJson = key.text;
+    const keyJson = key.contents;
 
     query = await db.query(
         `insert into users (uuid, email, password, key) VALUES($1, $2, $3, $4)`,

@@ -69,7 +69,7 @@ export default function signup() {
                     <FileSelector
                         className="bg-gray-100 text-gray-600 text-center p-6 my-6 rounded inline-block w-full outline-dashed outline-slate-400"
                         onSelection={(data) => setKey(data)}
-                        label={key.contents || "Upload Master Key"}
+                        label={key.name || "Upload Master Key"}
                     />
 
                     <div className="text-center">

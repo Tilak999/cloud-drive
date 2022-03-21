@@ -2,7 +2,7 @@ import axios from "axios";
 import React from "react";
 import notify from "../lib/notify";
 
-import FileActionBtn from "./FileActionBtn";
+import ActionBtn from "./ActionBtn";
 
 export default function DeleteAction({ ids, onCompletion }) {
     const onClick = async () => {
@@ -19,7 +19,7 @@ export default function DeleteAction({ ids, onCompletion }) {
 
     return (
         <React.Fragment>
-            <FileActionBtn type="delete" onClick={onClick} />
+            <ActionBtn type="delete" onClick={onClick} />
         </React.Fragment>
     );
 }

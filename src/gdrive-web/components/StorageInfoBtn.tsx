@@ -38,8 +38,8 @@ export default function StorageInfoBtn(props) {
     return (
         <React.Fragment>
             <button {...props} onClick={getInformation}>
-                <i className="bi bi-hdd text-lg align-middle mr-1"></i> Storage
-                Info
+                <i className="bi bi-hdd text-lg align-middle mr-1"></i>
+                <span className="hidden sm:inline-block">Storage Info</span>
             </button>
             <Modal
                 visible={isModalVisible}

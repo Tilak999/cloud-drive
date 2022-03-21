@@ -6,9 +6,15 @@ const btnGroup = {
         text: null,
     },
     move: {
-        icon: "bi-scissors",
-        tip: "Cut File or Folder",
-        action: "cut",
+        icon: "bi-folder-symlink",
+        tip: "Move File or Folder",
+        action: "move",
+        text: null,
+    },
+    rename: {
+        icon: "bi-cursor-text",
+        tip: "Rename File or Folder",
+        action: "rename",
         text: null,
     },
     delete: {
@@ -25,7 +31,7 @@ const btnGroup = {
     },
 };
 
-type ButtonType = "createFolder" | "move" | "delete" | "upload";
+type ButtonType = "createFolder" | "move" | "delete" | "upload" | "rename";
 
 interface propType {
     disabled?: boolean;
@@ -33,7 +39,7 @@ interface propType {
     onClick: (e: any) => void;
 }
 
-export default function FileActionBtn({ disabled, type, onClick }: propType) {
+export default function ActionBtn({ disabled, type, onClick }: propType) {
     const hint = btnGroup[type].tip || btnGroup[type].text;
     return (
         <>

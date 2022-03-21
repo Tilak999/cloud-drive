@@ -4,8 +4,9 @@ import StorageInfoBtn from "./StorageInfoBtn";
 export default function Header({ title }) {
     return (
         <div className="bg-white w-full h-12 shadow z-10 flex flex-row justify-between">
-            <div className="font-semibold text-lg my-2 mx-4">
-                <i className="bi bi-hdd-network mx-2"></i> {title}
+            <div className="font-semibold sm:text-lg my-3 mx-2 sm:mx-4">
+                <i className="bi bi-hdd-network hidden sm:inline-block sm:mx-2"></i>{" "}
+                {title}
             </div>
             <div className="my-1 flex flex-row space-x-3 mr-2">
                 <ActiveTransfers />

@@ -1,7 +1,7 @@
 import axios from "axios";
 import React from "react";
 import notify from "../lib/notify";
-import FileActionBtn from "@components/FileActionBtn";
+import ActionBtn from "@components/ActionBtn";
 
 export default function CreateFolderAction({ directoryId, onCompletion }) {
     const onClick = () => {
@@ -19,7 +19,7 @@ export default function CreateFolderAction({ directoryId, onCompletion }) {
 
     return (
         <React.Fragment>
-            <FileActionBtn type="createFolder" onClick={onClick} />
+            <ActionBtn type="createFolder" onClick={onClick} />
         </React.Fragment>
     );
 }

@@ -114,7 +114,7 @@ class GDriveFS {
                 orderBy: `folder, name, modifiedTime`,
             });
             if (data && data.files) {
-                this.log(data);
+                this.log("Number of items fetched:", data.files.length);
                 return data.files || [];
             } else {
                 return [];

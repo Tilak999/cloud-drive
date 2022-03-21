@@ -29,12 +29,11 @@ export default function ActiveTransfers() {
     return (
         <React.Fragment>
             <button
-                className="hover:bg-green-100 py-2 px-2 rounded-lg bg-gray-100 text-sm"
+                className="hover:bg-green-100 py-2 px-2 rounded-lg bg-gray-100 text-sm text-center"
                 onClick={() => setVisibility(!visible)}
             >
-                <span className="mx-2">
-                    <span></span>Active Transfers
-                </span>
+                <i className="bi bi-collection mr-1"></i>
+                <span>Active Uploads</span>
             </button>
             <Modal
                 visible={visible}

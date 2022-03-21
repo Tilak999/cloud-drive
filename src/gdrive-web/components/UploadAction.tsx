@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useRef, useState } from "react";
-import FileActionBtn from "./FileActionBtn";
+import ActionBtn from "./ActionBtn";
 import uploadFile from "../lib/uploadHandler";
 import Modal from "./Modal";
 
@@ -18,7 +18,7 @@ export default function UploadAction({ directoryId, onCompletion }) {
 
     return (
         <React.Fragment>
-            <FileActionBtn
+            <ActionBtn
                 type="upload"
                 onClick={() => setVisible((v) => !v)}
             />

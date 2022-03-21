@@ -380,8 +380,9 @@ class GDriveFS {
 
     async move(sourceId: string, destinationId: string) {
         if (!sourceId || sourceId == "") throw "Invalid sourceId";
-        if (!destinationId || destinationId == "")
-            throw "Invalid destinationId";
+        if (!destinationId || destinationId == "") {
+            destinationId = await this.getRootDir();
+        }
         const src = await this.getObject(sourceId);
         const dest = await this.getObject(destinationId);
         if (src && dest) {

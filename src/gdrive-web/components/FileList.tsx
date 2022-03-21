@@ -4,7 +4,6 @@ import Spinner from "./spinner";
 import Checkbox from "./Checkbox";
 import Icon from "./Icon";
 import { formatDate } from "@lib/utils";
-import { route } from "next/dist/server/router";
 
 interface PropType {
     items: any[];

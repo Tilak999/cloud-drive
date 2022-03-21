@@ -8,12 +8,13 @@ import CreateFolderAction from "@components/CreateFolderAction";
 import DeleteAction from "@components/DeleteAction";
 import UploadAction from "@components/UploadAction";
 import RenameAction from "@components/RenameAction";
+import MoveAction from "@components/MoveAction";
 
 export default function Folder() {
     const router = useRouter();
     const [items, setItems] = useState(null);
     const [currentPath, setCurrentPath] = useState(["Home"]);
-    const [selected, setSelection] = useState([]);
+    const [selected, setSelection] = useState<string[]>([]);
     const url = "/api/listFiles";
 
     const loadFiles = () => {
@@ -65,6 +66,7 @@ export default function Folder() {
                         onCompletion={loadFiles}
                     />
                     <DeleteAction ids={selected} onCompletion={loadFiles} />
+                    <MoveAction onCompletion={loadFiles} selected={selected} />
                     <UploadAction
                         directoryId={router.query.folderId}
                         onCompletion={loadFiles}

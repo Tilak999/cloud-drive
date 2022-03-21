@@ -9,7 +9,7 @@ const btnGroup = {
         icon: "bi-folder-symlink",
         tip: "Move File or Folder",
         action: "move",
-        text: null,
+        text: "Move",
     },
     rename: {
         icon: "bi-cursor-text",

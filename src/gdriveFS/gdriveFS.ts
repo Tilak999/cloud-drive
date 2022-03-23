@@ -163,7 +163,6 @@ class GDriveFS {
                 role: "reader",
                 emailAddress: email,
             },
-            transferOwnership: true,
             fileId,
             fields: "*",
         });

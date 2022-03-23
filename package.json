@@ -1,8 +1,8 @@
 {
     "name": "@ideabox/cloud-drive",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Cloud Storage using service account",
-    "main": "dist/gdriveFS",
+    "main": "dist/gdriveFS/index.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/Tilak999/cloud-drive"
@@ -15,6 +15,7 @@
         "dev": "next dev ./src/gdrive-web",
         "build": "tsc && next build ./src/gdrive-web",
         "build-web": "next build ./src/gdrive-web",
+        "publish": "npm run build && npm publish",
         "start": "next start ./src/gdrive-web",
         "lint": "next lint"
     },

@@ -277,7 +277,7 @@ class GDriveFS {
                 if (response.data != null && response.data.id != null) {
                     const fileid = response.data.id;
                     try {
-                        this.setPermission(auth, fileid, email);
+                        await this.setPermission(auth, fileid, email);
                         const description = JSON.stringify({
                             ...response.data,
                             serviceAccountName,
@@ -289,11 +289,10 @@ class GDriveFS {
                             description
                         );
                     } catch (error: any) {
-                        try {
-                            this.deleteObject(response.data.id);
-                        } finally {
-                            throw error;
-                        }
+                        await drive.files.delete({
+                            auth,
+                            fileId: fileid,
+                        });
                     }
                 } else {
                     throw `File [${config.name}] upload failed`;

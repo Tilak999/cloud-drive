@@ -41,7 +41,6 @@ async function performUploads() {
         formdata.set("directoryId", directoryId);
         await axios.post("/api/uploadFiles", formdata, {
             onUploadProgress: (progress) => {
-                console.log(progress);
                 current_active = {
                     loaded: progress.loaded,
                     total: progress.total,

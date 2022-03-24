@@ -44,6 +44,7 @@ declare class GDriveFS {
         data: import("stream").Readable;
     } | undefined>;
     shareDrive(email: string, revoke?: boolean): Promise<void>;
+    cleanup(): Promise<void>;
 }
 export default GDriveFS;
 //# sourceMappingURL=gdriveFS.d.ts.map

@@ -7,4 +7,4 @@ const drive = new GDriveFS({
     enableDebugLogs: true,
 });
 
-drive.shareDrive(`trollvia.official@gmail.com`);
+drive.cleanup();

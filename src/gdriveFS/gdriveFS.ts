@@ -1,4 +1,5 @@
 import { drive_v3, google } from "googleapis";
+import { file } from "googleapis/build/src/apis/file";
 import { Stream } from "stream";
 import { FileConfig } from "./types";
 const drive = google.drive("v3");
@@ -443,6 +444,59 @@ class GDriveFS {
         const auth = await this.authorize(this._indexAuth);
         if (!revoke) this.setPermission(auth, root, email);
         else this.removePermission(auth, this._rootDirectory, email);
+    }
+
+    async cleanup() {
+        const promises = [];
+        const keyNames = Object.keys(this._keyFile) as any[];
+        for (const keyName of keyNames) {
+            promises.push(
+                drive.files.list({
+                    auth: await this.authorize(this._keyFile[keyName]),
+                    fields: "*",
+                })
+            );
+        }
+        const results = await Promise.all(promises);
+        const files: any[] = [];
+        for (const result of results) {
+            if (result.data && result.data.files) {
+                for (const result of results) {
+                }
+                result.data.files.forEach((i) => files.push(i));
+            }
+        }
+
+        const shortcuts = files.filter(
+            (file) => file.mimeType === MIME_TYPE_LINK
+        );
+
+        const rawFiles = files.filter(
+            (file) =>
+                file.mimeType !== MIME_TYPE_LINK &&
+                file.mimeType !== MIME_TYPE_DIRECTORY
+        );
+
+        const shortcutParentIds = shortcuts.map(
+            (file) => file.shortcutDetails.targetId
+        );
+
+        const danglingFiles = rawFiles.filter(
+            (f) => !shortcutParentIds.includes(f.id)
+        );
+
+        danglingFiles.forEach(async (file) => {
+            let chunk = file.owners[0].emailAddress.split(".");
+            chunk = chunk[0].split("@");
+            const accnt = chunk[1] + "-" + chunk[0];
+            drive.files
+                .delete({
+                    auth: await this.authorize(this._keyFile[accnt]),
+                    fileId: file.id,
+                })
+                .then((d) => console.log("deleted:", file.name))
+                .catch((e) => console.log("deletion failed:", file.name));
+        });
     }
 }
 

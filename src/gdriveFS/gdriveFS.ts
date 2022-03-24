@@ -165,6 +165,7 @@ class GDriveFS {
             },
             fileId,
             fields: "*",
+            sendNotificationEmail: false,
         });
     }
 

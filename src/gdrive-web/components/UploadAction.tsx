@@ -27,14 +27,14 @@ export default function UploadAction({ directoryId, onCompletion }) {
                 type="file"
                 webkitdirectory=""
                 mozdirectory=""
-                className="w-0 h-0"
+                className="hidden"
                 onChange={(e) => uploadFiles(e)}
             />
             <input
                 ref={inputFile}
                 type="file"
                 multiple
-                className="w-0 h-0"
+                className="hidden"
                 onChange={(e) => uploadFiles(e)}
             />
             <Modal

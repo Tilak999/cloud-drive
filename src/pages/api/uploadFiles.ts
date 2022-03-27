@@ -1,11 +1,11 @@
-import Cookies from "cookies";
 import getGFS from "@lib/gdrive";
 import nextConnect from "next-connect";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { NextApiRequest, NextApiResponse } from "next";
-import GDriveFS from "@dist/gdriveFS";
+import { getToken } from "@lib/utils";
+import GdriveFS from "@ideabox/cloud-drive-fs";
 
 // Returns a Multer instance that provides several methods for generating
 // middleware that process files uploaded in multipart/form-data format.
@@ -29,18 +29,14 @@ interface NextApiRequestWithFile extends NextApiRequest {
     files?: any;
 }
 
-async function getOrCreateDirectories(
-    gfs: GDriveFS,
-    directoryId: any,
-    relativePath: any
-) {
+async function getOrCreateDirectories(gfs: GdriveFS, directoryId, relativePath) {
     let parentId = directoryId;
     if (relativePath && relativePath.trim() != "") {
         const directories = path.parse(relativePath).dir.split("/");
         for (const folderName of directories) {
-            const result = await gfs.checkIfObjectExist(parentId, folderName);
-            if (result.exist) {
-                parentId = result.data.id;
+            const data = await gfs.findByName(folderName, parentId);
+            if (data && data.id) {
+                parentId = data.id;
             } else {
                 console.log("->", "Creating directory: ", folderName);
                 const data = await gfs.createFolder(folderName, parentId);
@@ -53,16 +49,11 @@ async function getOrCreateDirectories(
 
 // Process a POST request
 apiRoute.post(async (req: NextApiRequestWithFile, res: NextApiResponse) => {
-    const cookie = new Cookies(req, res);
-    const gfs = await getGFS(cookie.get("token"));
+    const gfs = await getGFS(getToken(req, res));
     try {
         for (const file of req.files) {
             const { directoryId, relativePath } = req.body;
-            const destFolderId = await getOrCreateDirectories(
-                gfs,
-                directoryId,
-                relativePath
-            );
+            const destFolderId = await getOrCreateDirectories(gfs, directoryId, relativePath);
             const filepath = path.join(file.destination, file.filename);
             try {
                 console.log(`Uploading.. ${file.filename}`);

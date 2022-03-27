@@ -1,44 +1,34 @@
 {
-    "name": "@ideabox/cloud-drive",
+    "name": "cloud-browser",
     "version": "1.0.4",
-    "description": "Cloud Storage using service account",
-    "main": "dist/gdriveFS/index.js",
+    "description": "Cloud storage browser",
     "repository": {
         "type": "git",
         "url": "https://github.com/Tilak999/cloud-drive"
     },
-    "bin": {
-        "gfs": "./dist/src/gfs-cli/index.js"
-    },
     "scripts": {
-        "generateKey": "node ./src/tools/generateMasterKey.js",
-        "dev": "next dev ./src/gdrive-web",
-        "build": "tsc && next build ./src/gdrive-web",
-        "build-web": "next build ./src/gdrive-web",
+        "generateKey": "node ./tools/generateMasterKey.js",
+        "build": "next build ./src",
         "pub": "npm run build && npm publish",
-        "start": "next start ./src/gdrive-web",
+        "start": "next start ./src",
         "lint": "next lint"
     },
     "author": "Tilak999",
     "dependencies": {
+        "@ideabox/cloud-drive-fs": "^0.1.2",
         "axios": "^0.24.0",
         "bootstrap-icons": "^1.7.0",
-        "cli-table": "^0.3.6",
-        "commander": "^7.2.0",
         "cookies": "^0.8.0",
-        "googleapis": "^95.0.0",
         "multer": "^1.4.3",
         "next": "^12.0.3",
         "next-connect": "^0.11.0",
-        "ora": "^5.4.0",
         "pg": "^8.7.1",
         "react": "^17.0.2",
         "react-dom": "^17.0.2"
     },
     "license": "MIT",
     "devDependencies": {
-        "@types/cli-table": "^0.3.0",
-        "@types/node": "^17.0.19",
+        "@types/node": "^17.0.23",
         "@types/pg": "^8.6.4",
         "@types/react": "^17.0.39",
         "autoprefixer": "^10.4.0",

@@ -9,13 +9,13 @@
     "scripts": {
         "generateKey": "node ./tools/generateMasterKey.js",
         "build": "next build ./src",
-        "pub": "npm run build && npm publish",
+        "dev": "next dev ./src",
         "start": "next start ./src",
         "lint": "next lint"
     },
     "author": "Tilak999",
     "dependencies": {
-        "@ideabox/cloud-drive-fs": "^0.1.2",
+        "@ideabox/cloud-drive-fs": "^0.1.4",
         "axios": "^0.24.0",
         "bootstrap-icons": "^1.7.0",
         "cookies": "^0.8.0",

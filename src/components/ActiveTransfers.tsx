@@ -1,8 +1,8 @@
+import { humanFileSize } from "@lib/utils";
 import React, { useState } from "react";
 import useInterval from "../hooks/useInterval";
 import { getTransferQueueStatus } from "../lib/uploadHandler";
 import Modal from "./Modal";
-import { humanFileSize } from "@dist/lib/utils";
 
 export default function ActiveTransfers() {
     const [transfers, setTransfers] = useState({
@@ -56,15 +56,12 @@ export default function ActiveTransfers() {
                                 </div>
                                 <div className="text-sm">
                                     <span className="mr-2">
-                                        Progress:{" "}
-                                        {transfers.current_active.percentage}%
+                                        Progress: {transfers.current_active.percentage}%
                                     </span>
                                     <span className="mx-2">
                                         {`uploaded: ${humanFileSize(
                                             transfers.current_active.loaded
-                                        )} of ${humanFileSize(
-                                            transfers.current_active.total
-                                        )}`}
+                                        )} of ${humanFileSize(transfers.current_active.total)}`}
                                     </span>
                                 </div>
                             </div>
@@ -83,12 +80,8 @@ export default function ActiveTransfers() {
                                     <i className="bi bi-cloud-arrow-up py-2 px-3 bg-green-400 rounded-full "></i>
                                 </div>
                                 <div>
-                                    <div className="my-1 break-words">
-                                        {file.name}
-                                    </div>
-                                    <div className="text-sm">
-                                        Size: {humanFileSize(file.total)}
-                                    </div>
+                                    <div className="my-1 break-words">{file.name}</div>
+                                    <div className="text-sm">Size: {humanFileSize(file.total)}</div>
                                 </div>
                             </div>
                         ))}
@@ -106,12 +99,8 @@ export default function ActiveTransfers() {
                                     <i className="bi bi-cloud-arrow-up py-2 px-3 bg-green-400 rounded-full"></i>
                                 </div>
                                 <div>
-                                    <div className="my-1 break-words">
-                                        {file.name}
-                                    </div>
-                                    <span className="text-sm text-green-600">
-                                        Upload Completed
-                                    </span>
+                                    <div className="my-1 break-words">{file.name}</div>
+                                    <span className="text-sm text-green-600">Upload Completed</span>
                                 </div>
                             </div>
                         ))}

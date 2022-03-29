@@ -8,7 +8,7 @@ export default function Breadcrumb({ chunks }) {
             const [name, id] = item.split(":");
             path += (path && "/") + chunk;
             if (chunk == item) {
-                return `/dashboard?folderId=${id || ""}&path=${path}`;
+                return `/legacy/dashboard?folderId=${id || ""}&path=${path}`;
             }
         }
     };

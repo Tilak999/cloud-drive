@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { humanFileSize } from "@dist/lib/utils";
 
 import notify from "@lib/notify";
 import Modal from "@components/Modal";
+import { humanFileSize } from "@lib/utils";
 
 export default function StorageInfoBtn(props) {
     const [isModalVisible, setModalVisibility] = useState(false);
@@ -16,12 +16,9 @@ export default function StorageInfoBtn(props) {
             .get("/api/getStorageInfo")
             .then((resp) => {
                 if (resp.status == 200) {
-                    const free =
-                        parseInt(resp.data.limit) - parseInt(resp.data.usage);
+                    const free = parseInt(resp.data.limit) - parseInt(resp.data.usage);
                     setStorageInfo({
-                        usagePercentage:
-                            parseInt(resp.data.usage) /
-                            parseInt(resp.data.limit),
+                        usagePercentage: parseInt(resp.data.usage) / parseInt(resp.data.limit),
                         total: humanFileSize(resp.data.limit),
                         used: humanFileSize(resp.data.usage),
                         free: humanFileSize(free),
@@ -48,19 +45,13 @@ export default function StorageInfoBtn(props) {
             >
                 {storageInfo ? (
                     <div className="text-base space-y-2 p-4">
-                        <progress
-                            className="w-full"
-                            value={storageInfo.usagePercentage}
-                            max={1}
-                        />
+                        <progress className="w-full" value={storageInfo.usagePercentage} max={1} />
                         <div>Total storage: {storageInfo.total}</div>
                         <div>Used: {storageInfo.used}</div>
                         <div>Free: {storageInfo.free}</div>
                     </div>
                 ) : (
-                    <div className="p-4">
-                        Fetching information.. please wait.
-                    </div>
+                    <div className="p-4">Fetching information.. please wait.</div>
                 )}
             </Modal>
         </React.Fragment>

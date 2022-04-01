@@ -1,13 +1,12 @@
 import "tailwindcss/tailwind.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import GlobalStore from "../context/GlobalStore";
-import { useState } from "react";
+import { ChakraProvider } from "@chakra-ui/react";
+import theme from "hooks/theme";
 
 export default function MyApp({ Component, pageProps }) {
-    const [store, setStore] = useState({});
     return (
-        <GlobalStore.Provider value={{ store, setStore }}>
+        <ChakraProvider theme={theme}>
             <Component {...pageProps} />
-        </GlobalStore.Provider>
+        </ChakraProvider>
     );
 }

@@ -1,4 +1,10 @@
 const btnGroup = {
+    reload: {
+        icon: "bi-arrow-clockwise",
+        tip: "Reload content",
+        action: "reload",
+        text: null,
+    },
     createFolder: {
         icon: "bi-folder-plus",
         tip: "Create New Folder",
@@ -31,7 +37,7 @@ const btnGroup = {
     },
 };
 
-type ButtonType = "createFolder" | "move" | "delete" | "upload" | "rename";
+type ButtonType = "reload" | "createFolder" | "move" | "delete" | "upload" | "rename";
 
 interface propType {
     disabled?: boolean;

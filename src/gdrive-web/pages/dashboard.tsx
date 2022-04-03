@@ -9,6 +9,7 @@ import DeleteAction from "@components/DeleteAction";
 import UploadAction from "@components/UploadAction";
 import RenameAction from "@components/RenameAction";
 import MoveAction from "@components/MoveAction";
+import ReloadAction from "@components/ReloadAction";
 
 export default function Folder() {
     const router = useRouter();
@@ -56,6 +57,10 @@ export default function Folder() {
                     <Breadcrumb chunks={currentPath} />
                 </div>
                 <div>
+                    <ReloadAction 
+                       onCompletion={loadFiles}
+                    />
+                    
                     <CreateFolderAction
                         directoryId={router.query.folderId}
                         onCompletion={loadFiles}

@@ -36,7 +36,14 @@ export default function Header({ index }: propType) {
                         Account
                     </Button>
                 </Tooltip>
-                <Button variant="ghost">Logout</Button>
+                <Button
+                    variant="ghost"
+                    onClick={() => {
+                        window.location.href = "/api/logout";
+                    }}
+                >
+                    Logout
+                </Button>
             </Box>
         </Flex>
     );

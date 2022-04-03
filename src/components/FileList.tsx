@@ -64,7 +64,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
     };
 
     return (
-        <TableContainer w="full" mx="6">
+        <TableContainer w="full" ml="6" my="2">
             <FileListHeader
                 title={data.name}
                 selection={selection}

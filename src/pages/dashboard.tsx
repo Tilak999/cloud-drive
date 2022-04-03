@@ -12,7 +12,7 @@ export default function dashboard() {
     return (
         <Flex direction="column">
             <Header />
-            <Flex m="4">
+            <Flex mx="4">
                 <Sidebar directoryId={directoryId} />
                 <FileList folderId={router.query.id || "root"} onDirectoryChange={setDirectoryId} />
             </Flex>

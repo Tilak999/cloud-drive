@@ -1,11 +1,14 @@
 import axios from "axios";
-import path from "path";
 
 const upload_queue = [];
 let current_active = null;
 const completed = [];
-
+let _onUpdate = console.log;
 let isRunning = false;
+
+export function onUpdate(callback) {
+    _onUpdate = callback;
+}
 
 export function getTransferQueueStatus() {
     return {
@@ -41,17 +44,17 @@ async function performUploads() {
         formdata.set("directoryId", directoryId);
         await axios.post("/api/uploadFiles", formdata, {
             onUploadProgress: (progress) => {
+                const percentage = ((progress.loaded / progress.total) * 100).toFixed(2);
                 current_active = {
                     loaded: progress.loaded,
                     total: progress.total,
                     name: file.name,
-                    percentage: (
-                        (progress.loaded / progress.total) *
-                        100
-                    ).toFixed(2),
+                    percentage,
+                    directoryId,
                 };
             },
         });
+        _onUpdate(current_active);
         completed.push(current_active);
         current_active = null;
     }

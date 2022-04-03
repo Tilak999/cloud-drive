@@ -10,6 +10,8 @@ import {
     Icon,
     useToast,
 } from "@chakra-ui/react";
+import axios from "axios";
+import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import { VscKey } from "react-icons/vsc";
 
@@ -19,6 +21,7 @@ export default function login() {
     const [keyFile, setkeyFile] = useState({ name: null, text: null });
     const fileInput = useRef(null);
     const toast = useToast();
+    const router = useRouter();
 
     const parseKeyFile = async () => {
         const files = fileInput.current.files;
@@ -42,11 +45,18 @@ export default function login() {
         return { email, password };
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
             const { email, password } = validateInput(e);
+            if (isLoginForm) {
+                const { data } = await axios.post("/api/signin", { email, password });
+                setLoading(false);
+                if (data.uuid) {
+                    router.push("/dashboard");
+                }
+            }
         } catch (e) {
             setLoading(false);
             toast({

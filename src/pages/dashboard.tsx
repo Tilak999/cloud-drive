@@ -10,12 +10,23 @@ export default function dashboard() {
     const router = useRouter();
 
     return (
-        <Flex direction="column">
-            <Header />
-            <Flex mx="4">
-                <Sidebar directoryId={directoryId} />
-                <FileList folderId={router.query.id || "root"} onDirectoryChange={setDirectoryId} />
-            </Flex>
-        </Flex>
+        <div className="flex flex-col h-screen overflow-hidden">
+            <div className="flex flex-none p-3 border-b border-grey">
+                <Header />
+            </div>
+            <div className="flex-1 overflow-hidden">
+                <div className="flex h-full">
+                    <div className="w-72 h-full px-3 overflow-y-auto">
+                        <Sidebar directoryId={directoryId} />
+                    </div>
+                    <div className="flex-1 h-full overflow-y-auto">
+                        <FileList
+                            folderId={router.query.id || "root"}
+                            onDirectoryChange={setDirectoryId}
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }

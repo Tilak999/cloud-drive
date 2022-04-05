@@ -38,7 +38,7 @@ export default function Sidebar({ directoryId }) {
     }, []);
 
     return (
-        <Box w="18em">
+        <Box>
             <Flex direction={"column"} my="4">
                 <VStack>
                     <Button

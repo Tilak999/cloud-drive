@@ -10,8 +10,8 @@ import RenameBtn from "./ActionButtons/RenameBtn";
 export default function FileListHeader({ title, selection, folderId, onRefresh }) {
     const router = useRouter();
     return (
-        <Flex>
-            <Box pl="3" py="4">
+        <Flex my="2">
+            <Box pl="3" my="2">
                 <Heading size={"md"} maxW="md" textOverflow={"ellipsis"} overflow="hidden">
                     {folderId != "root" && (
                         <IconButton

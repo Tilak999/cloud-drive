@@ -63,8 +63,13 @@ export default function FileList({ folderId, onDirectoryChange }) {
         loadFiles(folderId);
     };
 
+    const onFileClick = (file) => {
+        if (file.mimeType.includes("folder")) router.push("/dashboard?id=" + file.id);
+        else window.location.href = "/api/download?id=" + file.id;
+    };
+
     return (
-        <TableContainer w="full" ml="6" my="2">
+        <>
             <FileListHeader
                 title={data.name}
                 selection={selection}
@@ -76,45 +81,44 @@ export default function FileList({ folderId, onDirectoryChange }) {
                     <Spinner />
                 </Center>
             )}
-            <Table variant="simple" display={isLoading ? "none" : "table"}>
-                <Thead>
-                    <Tr>
-                        <Th w="8">
-                            <Checkbox colorScheme={"gray"} size={"lg"} onChange={selectAll} />
-                        </Th>
-                        <Th>Name</Th>
-                        <Th w="28">Date</Th>
-                        <Th w="28">Size</Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {data.files.map((f) => {
-                        return (
-                            <Tr key={f.id + f.modifiedTime} _hover={{ background: "gray.700" }}>
-                                <Td>
-                                    <Checkbox
-                                        isChecked={selection.findIndex((i) => i.id == f.id) > -1}
-                                        colorScheme={"gray"}
-                                        size={"lg"}
-                                        onChange={(e) => checkbox(e, f)}
-                                    />
-                                </Td>
-                                <Td
-                                    onClick={() => {
-                                        router.push("/dashboard?id=" + f.id);
-                                    }}
-                                    cursor="pointer"
-                                >
-                                    <FileIcon mimeType={f.mimeType} filename={f.name} />
-                                    <span style={{ marginLeft: "10px" }}>{f.name}</span>
-                                </Td>
-                                <Td>{formatDate(f.modifiedTime)}</Td>
-                                <Td>{f.size && humanFileSize(f.size)}</Td>
-                            </Tr>
-                        );
-                    })}
-                </Tbody>
-            </Table>
-        </TableContainer>
+            <TableContainer className="w-full px-2 mb-4">
+                <Table variant="simple" display={isLoading ? "none" : "table"}>
+                    <Thead>
+                        <Tr>
+                            <Th w="8">
+                                <Checkbox colorScheme={"gray"} size={"lg"} onChange={selectAll} />
+                            </Th>
+                            <Th>Name</Th>
+                            <Th w="28">Date</Th>
+                            <Th w="28">Size</Th>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        {data.files.map((f) => {
+                            return (
+                                <Tr key={f.id + f.modifiedTime} _hover={{ background: "gray.700" }}>
+                                    <Td>
+                                        <Checkbox
+                                            isChecked={
+                                                selection.findIndex((i) => i.id == f.id) > -1
+                                            }
+                                            colorScheme={"gray"}
+                                            size={"lg"}
+                                            onChange={(e) => checkbox(e, f)}
+                                        />
+                                    </Td>
+                                    <Td onClick={() => onFileClick(f)} cursor="pointer">
+                                        <FileIcon mimeType={f.mimeType} filename={f.name} />
+                                        <span style={{ marginLeft: "10px" }}>{f.name}</span>
+                                    </Td>
+                                    <Td>{formatDate(f.modifiedTime)}</Td>
+                                    <Td>{f.size && humanFileSize(f.size)}</Td>
+                                </Tr>
+                            );
+                        })}
+                    </Tbody>
+                </Table>
+            </TableContainer>
+        </>
     );
 }

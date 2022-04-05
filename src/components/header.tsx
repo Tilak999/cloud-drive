@@ -12,6 +12,7 @@ import {
     Button,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import React from "react";
 import { GoFileSubmodule, GoSignOut } from "react-icons/go";
 import { VscGear } from "react-icons/vsc";
 
@@ -23,7 +24,7 @@ export default function Header({ index }: propType) {
     const router = useRouter();
 
     return (
-        <Flex borderBottom={"1px"} borderColor={"whiteAlpha.400"} p="2">
+        <React.Fragment>
             <Box>
                 <Button leftIcon={<GoFileSubmodule />} variant="ghost" aria-label={"User settings"}>
                     Cloud Browser
@@ -45,6 +46,6 @@ export default function Header({ index }: propType) {
                     Logout
                 </Button>
             </Box>
-        </Flex>
+        </React.Fragment>
     );
 }

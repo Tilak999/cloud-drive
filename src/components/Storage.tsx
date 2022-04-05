@@ -1,5 +1,5 @@
 import { Box, Progress, Text } from "@chakra-ui/react";
-import { humanFileSize } from "../lib/utils";
+import { humanFileSize } from "@lib/utils";
 import axios from "axios";
 import { useEffect, useState } from "react";
 

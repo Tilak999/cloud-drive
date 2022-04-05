@@ -1,5 +1,5 @@
-import db from "../../lib/db";
-import { calcHash } from "../../lib/utils";
+import db from "@lib/db";
+import { calcHash } from "@lib/utils";
 import Cookies from "cookies";
 
 export default async function signin(req, res) {

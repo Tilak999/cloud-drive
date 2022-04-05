@@ -1,8 +1,8 @@
 import { Box, Flex, VStack, Button, Text, Progress } from "@chakra-ui/react";
 import { GoFileDirectory, GoFile } from "react-icons/go";
-import Storage from "./Storage";
+import Storage from "@components/Storage";
 import { useEffect, useRef, useState } from "react";
-import uploadFile, { getTransferQueueStatus } from "../lib/uploadHandler";
+import uploadFile, { getTransferQueueStatus } from "@lib/uploadHandler";
 
 declare module "react" {
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {

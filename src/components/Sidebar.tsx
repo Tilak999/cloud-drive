@@ -4,6 +4,14 @@ import Storage from "@components/Storage";
 import { useEffect, useRef, useState } from "react";
 import uploadFile, { getTransferQueueStatus } from "@lib/uploadHandler";
 
+declare module "react" {
+    interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+        directory?: string;
+        webkitdirectory?: string;
+        mozdirectory?: string;
+    }
+}
+
 export default function Sidebar({ directoryId }) {
     const fileInput = useRef(null);
     const folderInput = useRef(null);

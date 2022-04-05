@@ -1,5 +1,5 @@
-import getGFS from "@lib/gdrive";
-import { assertNotEmpty, getToken } from "@lib/utils";
+import getGFS from "../../lib/gdrive";
+import { assertNotEmpty, getToken } from "../../lib/utils";
 
 export default async function downloadFile(req, res) {
     try {

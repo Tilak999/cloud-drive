@@ -1,7 +1,6 @@
-import { Flex } from "@chakra-ui/react";
-import Header from "@components/Header";
-import Sidebar from "@components/Sidebar";
-import FileList from "@components/FileList";
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
+import FileList from "../components/FileList";
 import { useState } from "react";
 import { useRouter } from "next/router";
 

@@ -1,5 +1,5 @@
 import GdriveFS from "@ideabox/cloud-drive-fs";
-import db from "@lib/db";
+import db from "./db";
 
 export default async function getGFS(uuid) {
     if (uuid in global) {

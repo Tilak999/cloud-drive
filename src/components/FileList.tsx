@@ -10,8 +10,8 @@ import {
     Spinner,
     Center,
 } from "@chakra-ui/react";
-import { onUpdate } from "@lib/uploadHandler";
-import { formatDate, humanFileSize } from "@lib/utils";
+import { onUpdate } from "../lib/uploadHandler";
+import { formatDate, humanFileSize } from "../lib/utils";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

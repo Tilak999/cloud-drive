@@ -1,16 +1,4 @@
-import {
-    Flex,
-    Box,
-    Heading,
-    Icon,
-    Spacer,
-    Tabs,
-    TabList,
-    Tab,
-    Tooltip,
-    IconButton,
-    Button,
-} from "@chakra-ui/react";
+import { Box, Spacer, Tooltip, Button } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
 import { GoFileSubmodule, GoSignOut } from "react-icons/go";

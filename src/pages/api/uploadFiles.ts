@@ -1,10 +1,10 @@
-import getGFS from "@lib/gdrive";
+import getGFS from "../../lib/gdrive";
 import nextConnect from "next-connect";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { NextApiRequest, NextApiResponse } from "next";
-import { getToken } from "@lib/utils";
+import { getToken } from "../../lib/utils";
 import GdriveFS from "@ideabox/cloud-drive-fs";
 
 // Returns a Multer instance that provides several methods for generating

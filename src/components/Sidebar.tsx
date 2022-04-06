@@ -1,4 +1,4 @@
-import { Box, Flex, VStack, Button, Text, Progress } from "@chakra-ui/react";
+import { Box, Flex, VStack, Button, Text, Progress, useInterval } from "@chakra-ui/react";
 import { GoFileDirectory, GoFile } from "react-icons/go";
 import Storage from "@components/Storage";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +16,7 @@ declare module "react" {
 export default function Sidebar({ directoryId }) {
     const fileInput = useRef(null);
     const folderInput = useRef(null);
+
     const [progress, setProgress] = useState({
         isActive: false,
         uploading: 0,
@@ -32,17 +33,15 @@ export default function Sidebar({ directoryId }) {
         }
     };
 
-    useEffect(() => {
-        setInterval(() => {
-            const { upload_queue, completed, current_active } = getTransferQueueStatus();
-            setProgress({
-                isActive: current_active != null,
-                uploading: current_active?.percentage || 0,
-                queue: upload_queue.length,
-                completed: completed.length,
-            });
-        }, 2000);
-    }, []);
+    useInterval(() => {
+        const { upload_queue, completed, current_active } = getTransferQueueStatus();
+        setProgress({
+            isActive: current_active != null,
+            uploading: current_active?.percentage || 0,
+            queue: upload_queue.length,
+            completed: completed.length,
+        });
+    }, 2000);
 
     return (
         <Box>

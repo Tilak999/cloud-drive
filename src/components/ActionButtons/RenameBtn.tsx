@@ -13,8 +13,9 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useState } from "react";
+import { BiRename } from "react-icons/bi";
 
-export default function RenameBtn({ file, onRefresh }) {
+export default function RenameBtn({ file, onRefresh, iconOnly }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isLoading, setLoading] = useState(false);
     const [name, setName] = useState(file.name);
@@ -43,11 +44,10 @@ export default function RenameBtn({ file, onRefresh }) {
 
     return (
         <>
-            <Button onClick={onOpen}>Rename</Button>
-
+            <Button onClick={onOpen}>{iconOnly ? <BiRename /> : "Rename"}</Button>
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
-                <ModalContent>
+                <ModalContent m="3">
                     <ModalHeader>New Name</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>

@@ -13,8 +13,9 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRef, useState } from "react";
+import { FaFolderPlus } from "react-icons/fa";
 
-export default function NewFolderBtn({ currentFolderId, onRefresh }) {
+export default function NewFolderBtn({ currentFolderId, onRefresh, iconOnly }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isLoading, setLoading] = useState(false);
     const input = useRef(null);
@@ -46,17 +47,15 @@ export default function NewFolderBtn({ currentFolderId, onRefresh }) {
 
     return (
         <>
-            <Button onClick={onOpen}>New Folder</Button>
-
+            <Button onClick={onOpen}>{iconOnly ? <FaFolderPlus /> : "New Folder"}</Button>
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
-                <ModalContent>
+                <ModalContent m="3">
                     <ModalHeader>Folder Name</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <Input type="text" ref={input} autoFocus={true} />
                     </ModalBody>
-
                     <ModalFooter>
                         <Button
                             colorScheme="blue"

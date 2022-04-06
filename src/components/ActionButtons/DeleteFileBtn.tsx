@@ -11,8 +11,9 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRef, useState } from "react";
+import { GoTrashcan } from "react-icons/go";
 
-export default function DeleteFileBtn({ selection, onRefresh }) {
+export default function DeleteFileBtn({ selection, onRefresh, iconOnly }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
     const [isLoading, setLoading] = useState(false);
@@ -29,7 +30,9 @@ export default function DeleteFileBtn({ selection, onRefresh }) {
 
     return (
         <>
-            <Button onClick={onOpen}>Delete</Button>
+            <Button onClick={onOpen} colorScheme="orange">
+                {iconOnly ? <GoTrashcan /> : "Delete"}
+            </Button>
             <AlertDialog
                 motionPreset="slideInBottom"
                 leastDestructiveRef={cancelRef}
@@ -38,8 +41,7 @@ export default function DeleteFileBtn({ selection, onRefresh }) {
                 isCentered
             >
                 <AlertDialogOverlay />
-
-                <AlertDialogContent>
+                <AlertDialogContent m="3">
                     <AlertDialogHeader>Confirm Delete</AlertDialogHeader>
                     <AlertDialogCloseButton />
                     <AlertDialogBody>

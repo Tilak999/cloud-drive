@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { GoFileDirectory } from "react-icons/go";
+import { GoFileDirectory, GoFileSymlinkDirectory } from "react-icons/go";
 
 function FileList({ data, onSelect }) {
     const style = {
@@ -56,7 +56,7 @@ function FileList({ data, onSelect }) {
     );
 }
 
-export default function MoveBtn({ selection, onRefresh }) {
+export default function MoveBtn({ selection, onRefresh, iconOnly }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
 
@@ -90,7 +90,7 @@ export default function MoveBtn({ selection, onRefresh }) {
 
     return (
         <>
-            <Button onClick={onOpen}>Move</Button>
+            <Button onClick={onOpen}>{iconOnly ? <GoFileSymlinkDirectory /> : "Delete"}</Button>
             <AlertDialog
                 motionPreset="slideInBottom"
                 leastDestructiveRef={cancelRef}
@@ -99,7 +99,7 @@ export default function MoveBtn({ selection, onRefresh }) {
                 isCentered
             >
                 <AlertDialogOverlay />
-                <AlertDialogContent>
+                <AlertDialogContent m="3">
                     <AlertDialogHeader>Select Folder</AlertDialogHeader>
                     <AlertDialogCloseButton />
                     <AlertDialogBody px="0" maxH={"450px"} overflowY="auto">

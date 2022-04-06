@@ -1,4 +1,4 @@
-import { Flex, Box, Heading, Spacer, HStack, Input, IconButton } from "@chakra-ui/react";
+import { Flex, Box, Heading, Spacer, HStack, Input, IconButton, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { GoSync } from "react-icons/go";
 import { VscArrowLeft } from "react-icons/vsc";
@@ -12,7 +12,11 @@ export default function FileListHeader({ title, selection, folderId, onRefresh }
     return (
         <Flex my="2">
             <Box pl="3" my="2">
-                <Heading size={"md"} maxW="md" textOverflow={"ellipsis"} overflow="hidden">
+                <Heading
+                    size="md"
+                    maxW="xl"
+                    className="whitespace-nowrap overflow-hidden text-ellipsis"
+                >
                     {folderId != "root" && (
                         <IconButton
                             icon={<VscArrowLeft />}
@@ -22,7 +26,9 @@ export default function FileListHeader({ title, selection, folderId, onRefresh }
                             mr="4"
                         />
                     )}
-                    {title}
+                    <Tooltip label={title} hasArrow color="gray.300" bg="gray.900">
+                        {title}
+                    </Tooltip>
                 </Heading>
             </Box>
             <Spacer />

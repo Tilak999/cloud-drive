@@ -4,12 +4,10 @@ import Cookies from "cookies";
 
 export default async function createMasterKey(req, res) {
     const { email, password, key } = req.body;
-    if (!email || !password || !key || !key.contents)
-        return res.status(400).send("bad request");
+    if (!email || !password || !key || !key.contents) return res.status(400).send("bad request");
 
     let query = await db.query(`Select * From users Where email=$1`, [email]);
-    if (query.rowCount != 0)
-        return res.status(400).send("User already created.");
+    if (query.rowCount != 0) return res.status(400).send("User already exist.");
 
     const passwordHash = calcHash(password);
     const uuid = calcHash(email + password + Math.random());

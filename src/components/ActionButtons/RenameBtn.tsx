@@ -9,6 +9,7 @@ import {
     ModalHeader,
     ModalOverlay,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useState } from "react";
@@ -17,17 +18,26 @@ export default function RenameBtn({ file, onRefresh }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isLoading, setLoading] = useState(false);
     const [name, setName] = useState(file.name);
+    const toast = useToast();
 
     const createFolder = async () => {
         if (name != "") {
             setLoading(true);
-            const { data } = await axios.post("/api/rename", {
-                id: file.id,
-                name: name,
-            });
+            try {
+                const { data } = await axios.post("/api/rename", {
+                    id: file.id,
+                    name: name,
+                });
+                onClose();
+                onRefresh(data);
+            } catch (e) {
+                toast({
+                    title: e.response.data.errorMsg,
+                    isClosable: true,
+                    status: "error",
+                });
+            }
             setLoading(false);
-            onClose();
-            onRefresh(data);
         }
     };
 

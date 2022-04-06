@@ -3,6 +3,7 @@ import { GoFileDirectory, GoFile } from "react-icons/go";
 import Storage from "@components/Storage";
 import { useEffect, useRef, useState } from "react";
 import uploadFile, { getTransferQueueStatus } from "@lib/uploadHandler";
+import ViewDetailsBtn from "./ActionButtons/ViewDetailsBtn";
 
 declare module "react" {
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
@@ -16,6 +17,7 @@ export default function Sidebar({ directoryId }) {
     const fileInput = useRef(null);
     const folderInput = useRef(null);
     const [progress, setProgress] = useState({
+        isActive: false,
         uploading: 0,
         queue: 0,
         completed: 0,
@@ -33,12 +35,9 @@ export default function Sidebar({ directoryId }) {
     useEffect(() => {
         setInterval(() => {
             const { upload_queue, completed, current_active } = getTransferQueueStatus();
-            let progress = 0;
-            if (current_active) {
-                progress = (current_active.loaded / current_active.total) * 100;
-            }
             setProgress({
-                uploading: progress,
+                isActive: current_active != null,
+                uploading: current_active?.percentage || 0,
                 queue: upload_queue.length,
                 completed: completed.length,
             });
@@ -86,6 +85,7 @@ export default function Sidebar({ directoryId }) {
                 <Text fontSize={"sm"} color="gray.400" py="1">
                     Upload Completed: {progress.completed}
                 </Text>
+                <ViewDetailsBtn />
             </Box>
         </Box>
     );

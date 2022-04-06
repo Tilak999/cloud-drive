@@ -59,12 +59,15 @@ export default function login() {
             }
         } catch (e) {
             setLoading(false);
-            toast({
-                title: e,
-                status: "error",
-                position: "top",
-                isClosable: true,
-            });
+            if (!toast.isActive("authfail"))
+                toast({
+                    id: "authfail",
+                    title: e.response.data,
+                    status: "error",
+                    position: "top",
+                    duration: 1000,
+                    isClosable: true,
+                });
         }
     };
 

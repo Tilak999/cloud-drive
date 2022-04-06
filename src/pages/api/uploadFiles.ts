@@ -29,7 +29,7 @@ interface NextApiRequestWithFile extends NextApiRequest {
     files?: any;
 }
 
-async function getOrCreateDirectories(gfs: GdriveFS, directoryId, relativePath) {
+async function getOrCreateDirectories(gfs: GdriveFS, directoryId: string, relativePath: string) {
     let parentId = directoryId;
     if (relativePath && relativePath.trim() != "") {
         const directories = path.parse(relativePath).dir.split("/");

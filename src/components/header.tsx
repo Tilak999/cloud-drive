@@ -1,19 +1,7 @@
-import {
-    Flex,
-    Box,
-    Heading,
-    Icon,
-    Spacer,
-    Tabs,
-    TabList,
-    Tab,
-    Tooltip,
-    IconButton,
-    Button,
-} from "@chakra-ui/react";
+import { Box, Spacer, Tooltip, Button } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
-import { GoFileSubmodule, GoSignOut } from "react-icons/go";
+import { GoFileSubmodule } from "react-icons/go";
 import { VscGear } from "react-icons/vsc";
 
 interface propType {
@@ -26,17 +14,20 @@ export default function Header({ index }: propType) {
     return (
         <React.Fragment>
             <Box>
-                <Button leftIcon={<GoFileSubmodule />} variant="ghost" aria-label={"User settings"}>
+                <Button
+                    leftIcon={<GoFileSubmodule />}
+                    variant="ghost"
+                    aria-label={"User settings"}
+                    onClick={() => router.replace("/dashboard")}
+                >
                     Cloud Browser
                 </Button>
             </Box>
             <Spacer />
             <Box>
-                <Tooltip label="User settings">
-                    <Button leftIcon={<VscGear />} variant="ghost" aria-label={"User settings"}>
-                        Account
-                    </Button>
-                </Tooltip>
+                <Button leftIcon={<VscGear />} variant="ghost" aria-label={"User settings"}>
+                    Account
+                </Button>
                 <Button
                     variant="ghost"
                     onClick={() => {

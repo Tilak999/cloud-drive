@@ -1,8 +1,21 @@
 import axios from "axios";
 
-const upload_queue = [];
-let current_active = null;
-const completed = [];
+interface currentFileProgress {
+    loaded: number;
+    total: number;
+    name: string;
+    percentage: number;
+    directoryId: string;
+}
+
+interface uploadFileObject extends currentFileProgress {
+    file: File;
+}
+
+const upload_queue: uploadFileObject[] = [];
+let current_active: currentFileProgress;
+const completed: currentFileProgress[] = [];
+
 let _onUpdate = console.log;
 let isRunning = false;
 
@@ -25,6 +38,7 @@ export default async function uploadFile(item) {
         total: item.file.size,
         file: item.file,
         directoryId: item.directoryId,
+        percentage: 0,
     });
     if (!isRunning) {
         isRunning = true;
@@ -44,7 +58,7 @@ async function performUploads() {
         formdata.set("directoryId", directoryId);
         await axios.post("/api/uploadFiles", formdata, {
             onUploadProgress: (progress) => {
-                const percentage = ((progress.loaded / progress.total) * 100).toFixed(2);
+                const percentage = (progress.loaded / progress.total) * 100;
                 current_active = {
                     loaded: progress.loaded,
                     total: progress.total,

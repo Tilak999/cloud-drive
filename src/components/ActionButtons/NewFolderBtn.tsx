@@ -9,6 +9,7 @@ import {
     ModalHeader,
     ModalOverlay,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRef, useState } from "react";
@@ -17,18 +18,29 @@ export default function NewFolderBtn({ currentFolderId, onRefresh }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isLoading, setLoading] = useState(false);
     const input = useRef(null);
+    const toast = useToast();
 
     const createFolder = async () => {
         const value = input.current.value;
         if (value != "") {
             setLoading(true);
-            const { data } = await axios.post("/api/createFolder", {
-                directoryId: currentFolderId,
-                directoryName: value,
-            });
+            try {
+                const { data } = await axios.post("/api/createFolder", {
+                    directoryId: currentFolderId,
+                    directoryName: value,
+                });
+                onRefresh(data);
+                onClose();
+            } catch (e) {
+                const exist = (e.response.data.message as string).includes("already exist");
+                toast({
+                    title: exist ? "Folder with provided name already exist." : e,
+                    status: "error",
+                    isClosable: true,
+                    position: "top",
+                });
+            }
             setLoading(false);
-            onClose();
-            onRefresh(data);
         }
     };
 

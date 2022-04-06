@@ -1,9 +1,19 @@
-import { Box, Flex, VStack, Button, Text, Progress, useInterval } from "@chakra-ui/react";
+import {
+    Box,
+    Flex,
+    VStack,
+    Button,
+    Text,
+    Progress,
+    useInterval,
+    useBreakpointValue,
+} from "@chakra-ui/react";
 import { GoFileDirectory, GoFile } from "react-icons/go";
 import Storage from "@components/Storage";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import uploadFile, { getTransferQueueStatus } from "@lib/uploadHandler";
 import ViewDetailsBtn from "./ActionButtons/ViewDetailsBtn";
+import If from "./If";
 
 declare module "react" {
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
@@ -16,6 +26,7 @@ declare module "react" {
 export default function Sidebar({ directoryId }) {
     const fileInput = useRef(null);
     const folderInput = useRef(null);
+    const breakpt = useBreakpointValue({ base: "base", md: "md" });
 
     const [progress, setProgress] = useState({
         isActive: false,
@@ -63,7 +74,7 @@ export default function Sidebar({ directoryId }) {
                     </Button>
                 </VStack>
             </Flex>
-            <div style={{ display: "none" }}>
+            <div className="hidden">
                 <input type="file" multiple ref={fileInput} onChange={onSelection} />
                 <input
                     type="file"
@@ -86,6 +97,18 @@ export default function Sidebar({ directoryId }) {
                 </Text>
                 <ViewDetailsBtn />
             </Box>
+
+            <If condition={breakpt == "base"}>
+                <Button
+                    variant="solid"
+                    w="full"
+                    onClick={() => {
+                        window.location.href = "/api/logout";
+                    }}
+                >
+                    Logout
+                </Button>
+            </If>
         </Box>
     );
 }

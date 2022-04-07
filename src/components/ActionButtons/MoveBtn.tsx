@@ -90,7 +90,7 @@ export default function MoveBtn({ selection, onRefresh, iconOnly }) {
 
     return (
         <>
-            <Button onClick={onOpen}>{iconOnly ? <GoFileSymlinkDirectory /> : "Delete"}</Button>
+            <Button onClick={onOpen}>{iconOnly ? <GoFileSymlinkDirectory /> : "Move"}</Button>
             <AlertDialog
                 motionPreset="slideInBottom"
                 leastDestructiveRef={cancelRef}

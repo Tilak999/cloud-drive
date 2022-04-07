@@ -152,17 +152,19 @@ export default function FileList({ folderId, onDirectoryChange }) {
                     </Table>
                 </TableContainer>
             </div>
-            <div>
-                <div className="flex justify-evenly bg-gray-900">
-                    <FileListHeader
-                        title={data.name}
-                        selection={selection}
-                        folderId={folderId}
-                        onRefresh={reset}
-                        iconOnly={breakpt == "base"}
-                    />
+            <If condition={breakpt == "base"}>
+                <div>
+                    <div className="flex justify-evenly bg-gray-900">
+                        <FileListHeader
+                            title={data.name}
+                            selection={selection}
+                            folderId={folderId}
+                            onRefresh={reset}
+                            iconOnly={breakpt == "base"}
+                        />
+                    </div>
                 </div>
-            </div>
+            </If>
         </>
     );
 }

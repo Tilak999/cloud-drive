@@ -12,9 +12,9 @@ interface uploadFileObject extends currentFileProgress {
     file: File;
 }
 
-const upload_queue: uploadFileObject[] = [];
+let upload_queue: uploadFileObject[] = [];
 let current_active: currentFileProgress;
-const completed: currentFileProgress[] = [];
+let completed: currentFileProgress[] = [];
 
 let _onUpdate = console.log;
 let isRunning = false;
@@ -50,7 +50,7 @@ export default async function uploadFile(item) {
 
 async function performUploads() {
     while (upload_queue.length > 0) {
-        const { file, directoryId } = upload_queue.pop();
+        const { file, directoryId } = upload_queue.shift();
         const relativePath = file.webkitRelativePath;
         const formdata = new FormData();
         formdata.set("files", file);
@@ -72,4 +72,12 @@ async function performUploads() {
         completed.push(current_active);
         current_active = null;
     }
+}
+
+export function removeFromQueue(fileName, directoryId) {
+    upload_queue = upload_queue.filter(file => !(file.name === fileName && file.directoryId === directoryId));
+}
+
+export function clearCompleted() {
+    completed = [];
 }

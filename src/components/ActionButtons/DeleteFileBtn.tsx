@@ -48,7 +48,7 @@ export default function DeleteFileBtn({ selection, onRefresh, iconOnly }) {
                         Are you sure you want to delete {selection.length} Items.
                     </AlertDialogBody>
                     <AlertDialogFooter>
-                        <Button ref={cancelRef} onClick={onClose}>
+                        <Button ref={cancelRef} onClick={onClose} disabled={isLoading}>
                             No
                         </Button>
                         <Button

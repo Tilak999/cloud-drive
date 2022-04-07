@@ -11,7 +11,7 @@ import {
     Heading,
     Progress,
 } from "@chakra-ui/react";
-import { getTransferQueueStatus } from "@lib/uploadHandler";
+import { getTransferQueueStatus, clearCompleted, removeFromQueue } from "@lib/uploadHandler";
 import { humanFileSize } from "@lib/utils";
 import { useRef, useState } from "react";
 
@@ -58,7 +58,7 @@ export default function ViewDetailsBtn() {
                     <AlertDialogHeader>Activity</AlertDialogHeader>
                     <AlertDialogCloseButton />
                     <AlertDialogBody maxH={"550px"} overflowY="auto">
-                        <div className="my-2">
+                        <div className="my-2 cursor-default">
                             <Heading size="sm" color={"gray.400"}>
                                 Active
                             </Heading>
@@ -82,7 +82,7 @@ export default function ViewDetailsBtn() {
                                 </div>
                             )}
                         </div>
-                        <div className="my-2">
+                        <div className="my-2 cursor-default">
                             <Heading size="sm" color={"gray.400"} mb="2">
                                 In Queue ({progress.queue.length})
                             </Heading>
@@ -96,6 +96,7 @@ export default function ViewDetailsBtn() {
                                         color="gray.500"
                                         className="hover:text-red-400"
                                         size={"sm"}
+                                        onClick={() => removeFromQueue(item.name, item.directoryId)}
                                     >
                                         Remove
                                     </Button>
@@ -107,9 +108,20 @@ export default function ViewDetailsBtn() {
                                 </div>
                             )}
                         </div>
-                        <div className="my-2">
-                            <Heading size="sm" color={"gray.400"} mb="2">
+                        <div className="my-2 cursor-default">
+                            <Heading size="sm" className="flex justify-between" color={"gray.400"} mb="2">
                                 Uploaded ({progress.completed.length})
+                                {progress.completed.length > 0 &&
+                                <Button
+                                    variant={"link"}
+                                    color="gray.500"
+                                    className="hover:text-red-400 mr-2"
+                                    size={"sm"}
+                                    onClick={clearCompleted}
+                                >
+                                    Clear completed
+                                </Button>
+                            }
                             </Heading>
                             {progress.completed.map((item) => (
                                 <div className="p-1">

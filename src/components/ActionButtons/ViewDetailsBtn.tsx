@@ -43,7 +43,7 @@ export default function ViewDetailsBtn() {
 
     return (
         <>
-            <Button variant={"link"} my="1" py="1" onClick={onModalOpen}>
+            <Button variant={"link"} my="1" py="1" size={"sm"} onClick={onModalOpen}>
                 View Details
             </Button>
             <AlertDialog
@@ -64,9 +64,11 @@ export default function ViewDetailsBtn() {
                             </Heading>
                             {progress.active ? (
                                 <div className="p-2">
-                                    <Text my="1">{progress.active.name}</Text>
-                                    <Progress value={progress.active.percentage} max={100} my="1" />
-                                    <div className="flex justify-between my-1">
+                                    <Text my="2" size="sm">
+                                        {progress.active.name}
+                                    </Text>
+                                    <Progress value={progress.active.percentage} max={100} my="2" />
+                                    <div className="flex justify-between my-2 text-sm text-gray-400">
                                         <div>
                                             {humanFileSize(progress.active.loaded)} /{" "}
                                             {humanFileSize(progress.active.total)}
@@ -81,12 +83,14 @@ export default function ViewDetailsBtn() {
                             )}
                         </div>
                         <div className="my-2">
-                            <Heading size="sm" color={"gray.400"}>
+                            <Heading size="sm" color={"gray.400"} mb="2">
                                 In Queue ({progress.queue.length})
                             </Heading>
                             {progress.queue.map((item) => (
-                                <div className="p-2 flex justify-between">
-                                    <Text my="1">{item.name}</Text>
+                                <div className="m-1 flex justify-between">
+                                    <Text my="1" color="gray.300" size="sm">
+                                        {item.name}
+                                    </Text>
                                     <Button
                                         variant={"link"}
                                         color="gray.500"
@@ -104,12 +108,14 @@ export default function ViewDetailsBtn() {
                             )}
                         </div>
                         <div className="my-2">
-                            <Heading size="sm" color={"gray.400"}>
+                            <Heading size="sm" color={"gray.400"} mb="2">
                                 Uploaded ({progress.completed.length})
                             </Heading>
                             {progress.completed.map((item) => (
-                                <div className="p-2">
-                                    <Text my="1">{item.name}</Text>
+                                <div className="p-1">
+                                    <Text my="1" color="gray.300" size="sm">
+                                        {item.name}
+                                    </Text>
                                 </div>
                             ))}
                             {progress.completed.length == 0 && (

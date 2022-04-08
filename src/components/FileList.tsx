@@ -10,15 +10,12 @@ import {
     Spinner,
     Center,
     useBreakpointValue,
-    IconButton,
-    Button,
 } from "@chakra-ui/react";
 import { onUpdate } from "@lib/uploadHandler";
 import { formatDate, humanFileSize } from "@lib/utils";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { VscFileSymlinkDirectory } from "react-icons/vsc";
 import FileIcon from "./FileIcons";
 import FileListHeader from "./FileListHeader";
 import If from "./If";

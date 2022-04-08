@@ -103,7 +103,8 @@ typings/
 .tern-port
 
 #extra
-masterKey.json
+*key.json
+*Key.json
 keys
 .theia
 .DS_Store

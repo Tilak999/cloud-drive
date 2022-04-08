@@ -1,17 +1,17 @@
 import {
     Box,
-    Flex,
-    VStack,
     Button,
-    Text,
+    Flex,
     Progress,
-    useInterval,
+    Text,
     useBreakpointValue,
+    useInterval,
+    VStack,
 } from "@chakra-ui/react";
-import { GoFileDirectory, GoFile } from "react-icons/go";
 import Storage from "@components/Storage";
-import { useRef, useState } from "react";
 import uploadFile, { getTransferQueueStatus } from "@lib/uploadHandler";
+import { useRef, useState } from "react";
+import { GoFile, GoFileDirectory } from "react-icons/go";
 import ViewDetailsBtn from "./ActionButtons/ViewDetailsBtn";
 import If from "./If";
 

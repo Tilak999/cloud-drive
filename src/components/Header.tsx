@@ -1,20 +1,19 @@
 import {
     Box,
-    Spacer,
-    Tooltip,
     Button,
-    useBreakpointValue,
-    IconButton,
     Drawer,
-    DrawerContent,
     DrawerCloseButton,
+    DrawerContent,
     DrawerOverlay,
+    IconButton,
+    Spacer,
+    useBreakpointValue,
     useDisclosure,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
 import { GoFileSubmodule } from "react-icons/go";
-import { VscGear, VscArrowLeft } from "react-icons/vsc";
+import { VscArrowLeft, VscGear } from "react-icons/vsc";
 import Sidebar from "./Sidebar";
 
 interface propType {

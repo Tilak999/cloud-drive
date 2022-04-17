@@ -9,6 +9,7 @@ export default async function downloadFile(req, res) {
         res.writeHead(200, {
             ...(result.length && { "Content-Length": result.length }),
             "Content-Disposition": `attachment; filename="${result.name}"`,
+            "Transfer-Encoding": "chunked",
         });
         result.data.pipe(res);
     } catch (e) {

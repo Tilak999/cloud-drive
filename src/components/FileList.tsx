@@ -76,6 +76,19 @@ export default function FileList({ folderId, onDirectoryChange }) {
 
     return (
         <>
+            <If condition={breakpt == "base"}>
+                <div>
+                    <div className="flex justify-evenly">
+                        <FileListHeader
+                            title={data.name}
+                            selection={selection}
+                            folderId={folderId}
+                            onRefresh={reset}
+                            iconOnly={breakpt == "base"}
+                        />
+                    </div>
+                </div>
+            </If>
             <div className="flex-1">
                 <If condition={breakpt == "md"}>
                     <FileListHeader
@@ -96,7 +109,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
                         <Thead>
                             <Tr>
                                 <If condition={breakpt == "md"}>
-                                    <Th w="8">
+                                    <Th w="4">
                                         <Checkbox
                                             colorScheme={"gray"}
                                             size={"lg"}
@@ -122,7 +135,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
                         <Tbody>
                             {data.files.map((f) => (
                                 <Tr key={f.id + f.modifiedTime} _hover={{ background: "gray.700" }}>
-                                    <Td>
+                                    <Td w="4">
                                         <Checkbox
                                             isChecked={
                                                 selection.findIndex((i) => i.id == f.id) > -1
@@ -152,19 +165,6 @@ export default function FileList({ folderId, onDirectoryChange }) {
                     </Table>
                 </TableContainer>
             </div>
-            <If condition={breakpt == "base"}>
-                <div>
-                    <div className="flex justify-evenly bg-gray-900">
-                        <FileListHeader
-                            title={data.name}
-                            selection={selection}
-                            folderId={folderId}
-                            onRefresh={reset}
-                            iconOnly={breakpt == "base"}
-                        />
-                    </div>
-                </div>
-            </If>
         </>
     );
 }

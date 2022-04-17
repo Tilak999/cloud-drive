@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/router";
 import React from "react";
 import { GoFileSubmodule } from "react-icons/go";
+import { MdMenu } from "react-icons/md";
 import { VscArrowLeft, VscGear } from "react-icons/vsc";
 import Sidebar from "./Sidebar";
 
@@ -57,7 +58,7 @@ export default function Header({ index }: propType) {
                 </Button>
             </Box>
             <Box display={breakpt == "md" ? "none" : "block"}>
-                <IconButton icon={<VscGear />} aria-label={"menu"} onClick={onOpen} />
+                <IconButton icon={<MdMenu />} aria-label={"menu"} onClick={onOpen} />
                 <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
                     <DrawerOverlay />
                     <DrawerContent bgColor={"gray.900"} p="4">

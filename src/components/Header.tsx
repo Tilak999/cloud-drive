@@ -8,13 +8,14 @@ import {
     IconButton,
     Spacer,
     useBreakpointValue,
-    useDisclosure,
+    useDisclosure
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
 import { GoFileSubmodule } from "react-icons/go";
 import { MdMenu } from "react-icons/md";
-import { VscArrowLeft, VscGear } from "react-icons/vsc";
+import { VscArrowLeft } from "react-icons/vsc";
+import SettingsBtn from "./ActionButtons/SettingsBtn";
 import Sidebar from "./Sidebar";
 
 interface propType {
@@ -45,9 +46,7 @@ export default function Header({ index }: propType) {
             </Box>
             <Spacer />
             <Box display={breakpt == "md" ? "block" : "none"}>
-                <Button leftIcon={<VscGear />} variant="ghost" aria-label={"User settings"}>
-                    Account
-                </Button>
+                <SettingsBtn/>
                 <Button
                     variant="ghost"
                     onClick={() => {

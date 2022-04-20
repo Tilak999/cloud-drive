@@ -2,7 +2,7 @@ import GdriveFS from "@ideabox/cloud-drive-fs";
 import db from "@lib/db";
 
 export default async function getGFS(uuid) {
-    if (uuid in global) {
+    if (uuid in global && global[uuid] != null) {
         return global[uuid] as GdriveFS;
     }
     const q = await db.query(`SELECT key FROM users WHERE uuid=$1`, [uuid]);

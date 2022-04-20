@@ -13,7 +13,9 @@ export default async function signin(req, res) {
     ]);
     if (query.rowCount > 0) {
         const cookies = new Cookies(req, res);
-        cookies.set("token", query.rows[0].uuid);
+        cookies.set("token", query.rows[0].uuid, {
+            sameSite: true,
+        });
         return res.status(200).send(query.rows[0]);
     }
     return res.status(401).send("Authentication failed");

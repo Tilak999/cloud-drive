@@ -40,3 +40,11 @@ export default async function updateAccount(req, res) {
         message: "Account information updated",
     });
 }
+
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: "10mb",
+        },
+    },
+};

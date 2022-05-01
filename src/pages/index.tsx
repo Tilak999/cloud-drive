@@ -1,14 +1,6 @@
 import {
-    Container,
-    Center,
-    Box,
-    Input,
-    FormControl,
-    FormLabel,
-    Button,
-    Text,
-    Icon,
-    useToast,
+    Box, Button, Center, Container, FormControl,
+    FormLabel, Icon, Input, Text, useToast
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter } from "next/router";
@@ -39,30 +31,37 @@ export default function login() {
         if (email.trim() === "") throw "Email is empty";
         if (password.trim() === "") throw "Password is empty";
         if (!isLoginForm) {
-            if (!keyFile || !keyFile.name) throw "Invalid Key file selection";
+            if (!keyFile || !keyFile.name || !keyFile.text) throw "Invalid Key file selection";
             if (e.target[2].value !== password) throw "Password fields don't match";
         }
-        return { email, password };
+        return { email, password, keyFile };
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const { email, password } = validateInput(e);
+            const { email, password, keyFile } = validateInput(e);
             if (isLoginForm) {
                 const { data } = await axios.post("/api/signin", { email, password });
                 setLoading(false);
                 if (data.uuid) {
                     router.push("/dashboard");
                 }
+            } else {
+                const key = {
+                    contents: (keyFile.text)
+                }
+                await axios.post("/api/signup", { email, password, key });
+                setLoading(false);
+                router.push("/dashboard");
             }
-        } catch (e) {
+        } catch (error) {
             setLoading(false);
             if (!toast.isActive("authfail"))
                 toast({
                     id: "authfail",
-                    title: e.response.data,
+                    title: error.response?.data,
                     status: "error",
                     position: "top",
                     duration: 1000,
@@ -83,7 +82,7 @@ export default function login() {
                             <FormLabel htmlFor="email" color={"whiteAlpha.500"}>
                                 Email address
                             </FormLabel>
-                            <Input id="email" type="email" />
+                            <Input id="email" type="email" autoComplete="username" />
                         </FormControl>
                         <FormControl my="4">
                             <FormLabel htmlFor="password" color={"whiteAlpha.500"}>

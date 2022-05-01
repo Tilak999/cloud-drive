@@ -6,12 +6,10 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogOverlay,
-    Button,
-    Text,
-    Heading,
-    Progress,
+    Button, Heading,
+    Progress, Text
 } from "@chakra-ui/react";
-import { getTransferQueueStatus, clearCompleted, removeFromQueue } from "@lib/uploadHandler";
+import { clearCompleted, getTransferQueueStatus, removeFromQueue } from "@lib/uploadHandler";
 import { humanFileSize } from "@lib/utils";
 import { useRef, useState } from "react";
 
@@ -51,6 +49,7 @@ export default function ViewDetailsBtn() {
                 onClose={onModalClose}
                 isOpen={isOpen}
                 isCentered
+                size="2xl"
                 leastDestructiveRef={undefined}
             >
                 <AlertDialogOverlay />

@@ -26,7 +26,7 @@ export default function FileListHeader({ title, selection, folderId, onRefresh, 
 	return (
 		<Flex my='2'>
 			<If condition={breakpt == 'md'}>
-				<Box pl='3' my='2'>
+				<Box pl='3' my='auto'>
 					<Heading
 						size='md'
 						maxW='xl'

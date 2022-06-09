@@ -88,7 +88,7 @@ export default function login() {
                             <FormLabel htmlFor="password" color={"whiteAlpha.500"}>
                                 Password
                             </FormLabel>
-                            <Input id="password" type="password" />
+                            <Input id="password" autoComplete="current-password" type="password" />
                         </FormControl>
                         {!isLoginForm && (
                             <FormControl my="4">

@@ -10,7 +10,7 @@ export default async function rename(req, res) {
         const item = await gfs.findById(id);
         if (item && item.parents[0]) {
             const list = await gfs.list(item.parents[0]);
-            const matchedItems = list.filter(
+            const matchedItems = list.files.filter(
                 (i) => i.name.toLowerCase() == name.toLowerCase() && i.id != id
             );
             if (matchedItems.length > 0) {

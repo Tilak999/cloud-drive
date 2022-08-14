@@ -18,7 +18,7 @@
         "@chakra-ui/react": "^1.8.7",
         "@emotion/react": "^11.8.2",
         "@emotion/styled": "^11.8.1",
-        "@ideabox/cloud-drive-fs": "^0.2.7",
+        "@ideabox/cloud-drive-fs": "^0.2.8",
         "axios": "^0.24.0",
         "cookies": "^0.8.0",
         "framer-motion": "^6.2.8",

@@ -1,18 +1,18 @@
-import registerService from "./registerService";
 import { Pool } from "pg";
-const connectionString = process.env.DATABASE_URL;
+import registerService from "./registerService";
 
-if (!connectionString) {
-    console.error("Database url is empty, set env variable 'DATABASE_URL'");
+if (!process.env.DB_PASSWORD) {
+    console.error(`Database Password Invalid: '${process.env.DB_PASSWORD}'`);
     process.exit(1);
 }
 
 const pool = registerService("db", () => {
     const pool = new Pool({
-        connectionString,
-        ssl: {
-            rejectUnauthorized: false,
-        },
+        user: process.env.DB_USER,
+        database: process.env.DB_DATABASE,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT || "5432"),
+        host: process.env.DB_HOST || "db",
     });
     createTables(pool);
     return pool;

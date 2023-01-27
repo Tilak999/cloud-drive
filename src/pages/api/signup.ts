@@ -2,6 +2,15 @@ import db from "@lib/db";
 import { calcHash } from "@lib/utils";
 import Cookies from "cookies";
 
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: "20mb",
+        },
+        responseLimit: false,
+    },
+};
+
 export default async function createMasterKey(req, res) {
     const { email, password, key } = req.body;
     if (!email || !password || !key || !key.contents) return res.status(400).send("bad request");
@@ -19,5 +28,5 @@ export default async function createMasterKey(req, res) {
     );
     const cookies = new Cookies(req, res);
     cookies.set("token", uuid);
-    res.send(query.rows);
+    res.send("OK");
 }

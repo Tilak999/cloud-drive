@@ -1,0 +1,26 @@
+version: "3.1"
+
+services:
+    db:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: example
+            POSTGRES_USER: root
+            POSTGRES_DB: general
+
+    app:
+        build: .
+        restart: always
+        environment:
+            DB_USER: root
+            DB_PASSWORD: example
+            DB_DATABASE: general
+        ports:
+            - 3000:3000
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080

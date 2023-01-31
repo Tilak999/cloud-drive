@@ -5,7 +5,7 @@ import registerService from "./registerService";
 let password = process.env.DB_PASSWORD;
 
 if (process.env.DB_PASSWORD_FILE) {
-    password = fs.readFileSync(process.env.DB_PASSWORD_FILE, "utf-8");
+    password = fs.readFileSync(process.env.DB_PASSWORD_FILE, "utf-8").trim();
 }
 
 if (!password) {
@@ -17,7 +17,7 @@ const pool = registerService("db", () => {
     const pool = new Pool({
         user: process.env.DB_USER,
         database: process.env.DB_DATABASE,
-        password: process.env.DB_PASSWORD,
+        password: password,
         port: parseInt(process.env.DB_PORT || "5432"),
         host: process.env.DB_HOST || "db",
     });

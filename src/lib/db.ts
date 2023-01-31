@@ -1,7 +1,14 @@
+import * as fs from "fs";
 import { Pool } from "pg";
 import registerService from "./registerService";
 
-if (!process.env.DB_PASSWORD) {
+let password = process.env.DB_PASSWORD;
+
+if (process.env.DB_PASSWORD_FILE) {
+    password = fs.readFileSync(process.env.DB_PASSWORD_FILE, "utf-8");
+}
+
+if (!password) {
     console.error(`Database Password Invalid: '${process.env.DB_PASSWORD}'`);
     process.exit(1);
 }

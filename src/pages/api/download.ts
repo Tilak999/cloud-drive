@@ -8,8 +8,7 @@ export default async function downloadFile(req, res) {
         const result = await gfs.download(req.query.id);
         res.writeHead(200, {
             ...(result.length && { "Content-Length": result.length }),
-            "Content-Disposition": `attachment; filename="${result.name}"`,
-            "Transfer-Encoding": "chunked",
+            "Content-Disposition": `attachment; filename="${result.name}"`
         });
         result.data.pipe(res);
     } catch (e) {

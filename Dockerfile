@@ -1,4 +1,5 @@
-FROM node:18-alpine
+FROM ubuntu:20.04
+FROM node:latest
 
 WORKDIR /app
 COPY . .

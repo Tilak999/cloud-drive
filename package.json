@@ -1,43 +1,51 @@
 {
-    "name": "cloud-browser",
-    "version": "1.0.4",
-    "description": "Cloud storage browser",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Tilak999/cloud-drive"
-    },
-    "scripts": {
-        "generateKey": "node ./tools/generateMasterKey.js",
-        "build": "next build ./src",
-        "dev": "next dev ./src",
-        "start": "next start ./src",
-        "lint": "next lint"
-    },
-    "author": "Tilak999",
-    "dependencies": {
-        "@chakra-ui/react": "^1.8.7",
-        "@emotion/react": "^11.8.2",
-        "@emotion/styled": "^11.8.1",
-        "@ideabox/cloud-drive-fs": "^0.2.8",
-        "axios": "^0.24.0",
-        "cookies": "^0.8.0",
-        "framer-motion": "^6.2.8",
-        "multer": "^1.4.3",
-        "next": "^12.0.3",
-        "next-connect": "^0.11.0",
-        "pg": "^8.7.1",
-        "react": "^17.0.2",
-        "react-dom": "^17.0.2",
-        "react-icons": "^4.3.1"
-    },
-    "license": "MIT",
-    "devDependencies": {
-        "@types/node": "^17.0.23",
-        "@types/pg": "^8.6.4",
-        "@types/react": "^17.0.39",
-        "autoprefixer": "^10.4.4",
-        "postcss": "^8.4.12",
-        "tailwindcss": "^3.0.23",
-        "typescript": "^4.5.5"
-    }
+	"name": "cloud-browser",
+	"version": "1.0.4",
+	"description": "Cloud storage browser",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Tilak999/cloud-drive"
+	},
+	"scripts": {
+		"generateKey": "node ./tools/generateMasterKey.js",
+		"build": "next build ./src",
+		"dev": "next dev ./src",
+		"start": "next start ./src",
+		"lint": "next lint",
+		"prepare": "husky install"
+	},
+	"author": "Tilak999",
+	"dependencies": {
+		"@chakra-ui/react": "^2.7.1",
+		"@emotion/react": "^11.11.1",
+		"@emotion/styled": "^11.11.0",
+		"@ideabox/cloud-drive-fs": "^0.2.8",
+		"axios": "^1.4.0",
+		"cookies": "^0.8.0",
+		"framer-motion": "^10.12.18",
+		"multer": "^1.4.3",
+		"next": "^13.4.7",
+		"next-connect": "^1.0.0",
+		"pg": "^8.11.1",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"react-icons": "^4.10.1"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^20.3.3",
+		"@types/pg": "^8.10.2",
+		"@types/react": "^18.2.14",
+		"autoprefixer": "^10.4.14",
+		"eslint": "8.44.0",
+		"eslint-config-next": "13.4.7",
+		"husky": "^8.0.3",
+		"lint-staged": "^13.2.3",
+		"postcss": "^8.4.24",
+		"tailwindcss": "^3.3.2",
+		"typescript": "^5.1.6"
+	},
+	"lint-staged": {
+		"*.js": "eslint --cache --fix"
+	}
 }

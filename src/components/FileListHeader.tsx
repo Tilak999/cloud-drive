@@ -10,7 +10,6 @@ import {
 	useBreakpointValue
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { GoSearch, GoSync } from 'react-icons/go';
 import { VscArrowLeft } from 'react-icons/vsc';
 import DeleteFileBtn from './ActionButtons/DeleteFileBtn';
@@ -19,13 +18,20 @@ import NewFolderBtn from './ActionButtons/NewFolderBtn';
 import RenameBtn from './ActionButtons/RenameBtn';
 import If from './If';
 
-export default function FileListHeader({ title, selection, folderId, onRefresh, iconOnly }) {
+export default function FileListHeader({
+	title,
+	fileCount,
+	selection,
+	folderId,
+	onRefresh,
+	iconOnly
+}) {
 	const router = useRouter();
-	const breakpt = useBreakpointValue({ base: 'base', md: 'md' });
+	const breakPt = useBreakpointValue({ base: 'base', md: 'md' });
 
 	return (
 		<Flex my='2'>
-			<If condition={breakpt == 'md'}>
+			<If condition={breakPt == 'md'}>
 				<Box pl='3' my='auto'>
 					<Heading
 						size='md'
@@ -51,10 +57,10 @@ export default function FileListHeader({ title, selection, folderId, onRefresh, 
 			<Box my='2' mx='1' borderRight={'1px'} borderColor='gray.600'>
 				<HStack px='3'>
 					<If condition={selection.length == 0}>
-						<If condition={breakpt == 'md'}>
+						<If condition={breakPt == 'md'}>
 							<Input variant='filled' placeholder='Search' />
 						</If>
-						<If condition={breakpt == 'base'}>
+						<If condition={breakPt == 'base'}>
 							<IconButton
 								icon={<GoSearch />}
 								aria-label={'reload'}
@@ -62,6 +68,11 @@ export default function FileListHeader({ title, selection, folderId, onRefresh, 
 							/>
 						</If>
 					</If>
+					{/* <If condition={fileCount.length}>
+						<Tooltip label={fileCount} hasArrow color='gray.300' bg='gray.900'>
+							Files: {fileCount}
+						</Tooltip>
+					</If> */}
 					<If condition={selection.length == 1}>
 						<RenameBtn file={selection[0]} onRefresh={onRefresh} iconOnly={iconOnly} />
 					</If>

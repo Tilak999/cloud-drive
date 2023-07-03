@@ -8,7 +8,7 @@
             "name": "Start app",
             "type": "node-terminal",
             "request": "launch",
-            "command": "source env.sh && npm run dev"
+            "command": "npm run dev"
           },      
     ]
 }

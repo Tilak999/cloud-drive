@@ -25,14 +25,14 @@ export default function FileList({ folderId, onDirectoryChange }) {
 	const [selection, setSelection] = useState([]);
 	const [isLoading, setLoading] = useState(false);
 	const router = useRouter();
-	const breakpt = useBreakpointValue({ base: 'base', md: 'md' });
+	const breakPt = useBreakpointValue({ base: 'base', md: 'md' });
 
 	useEffect(() => {
 		setSelection([]);
-		loadFiles(folderId);
+		this.loadFiles(folderId);
 		onUpdate((lastCompleted) => {
 			if (lastCompleted.directoryId == folderId) {
-				loadFiles(folderId, true);
+				this.loadFiles(folderId, true);
 			}
 		});
 	}, [folderId]);
@@ -73,23 +73,25 @@ export default function FileList({ folderId, onDirectoryChange }) {
 
 	return (
 		<>
-			<If condition={breakpt == 'base'}>
+			<If condition={breakPt == 'base'}>
 				<div>
 					<div className='flex justify-evenly'>
 						<FileListHeader
 							title={data.name}
+							fileCount={data.files.length}
 							selection={selection}
 							folderId={folderId}
 							onRefresh={reset}
-							iconOnly={breakpt == 'base'}
+							iconOnly={breakPt == 'base'}
 						/>
 					</div>
 				</div>
 			</If>
 			<div className='flex-1 h-full'>
-				<If condition={breakpt == 'md'}>
+				<If condition={breakPt == 'md'}>
 					<FileListHeader
 						title={data.name}
+						fileCount={data.files.length}
 						selection={selection}
 						folderId={folderId}
 						onRefresh={reset}
@@ -105,7 +107,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
 					<Table variant='simple' display={isLoading ? 'none' : 'table'}>
 						<Thead>
 							<Tr>
-								<If condition={breakpt == 'md'}>
+								<If condition={breakPt == 'md'}>
 									<Th w='4'>
 										<Checkbox
 											colorScheme={'gray'}
@@ -117,7 +119,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
 									<Th w='28'>Date</Th>
 									<Th w='28'>Size</Th>
 								</If>
-								<If condition={breakpt == 'base'}>
+								<If condition={breakPt == 'base'}>
 									<Th>
 										<Checkbox
 											colorScheme={'gray'}
@@ -142,7 +144,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
 											onChange={(e) => checkbox(e, f)}
 										/>
 									</Td>
-									<If condition={breakpt == 'md'}>
+									<If condition={breakPt == 'md'}>
 										<Td onClick={() => onFileClick(f)} cursor='pointer'>
 											<FileIcon mimeType={f.mimeType} filename={f.name} />
 											<span className='ml-2'>{f.name}</span>
@@ -150,7 +152,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
 										<Td>{formatDate(f.modifiedTime)}</Td>
 										<Td>{f.size && humanFileSize(f.size)}</Td>
 									</If>
-									<If condition={breakpt == 'base'}>
+									<If condition={breakPt == 'base'}>
 										<Td onClick={() => onFileClick(f)} pl='0'>
 											<FileIcon mimeType={f.mimeType} filename={f.name} />
 											<span className='ml-2'>{f.name}</span>

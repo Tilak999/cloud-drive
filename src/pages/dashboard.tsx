@@ -5,10 +5,10 @@ import Sidebar from '@components/Sidebar';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-export default function dashboard() {
+export default function Dashboard() {
 	const [directoryId, setDirectoryId] = useState();
 	const router = useRouter();
-	const breakpt = useBreakpointValue({ base: 'base', md: 'md' });
+	const breakPt = useBreakpointValue({ base: 'base', md: 'md' });
 
 	return (
 		<div className='flex flex-col h-screen overflow-hidden'>
@@ -17,7 +17,7 @@ export default function dashboard() {
 			</div>
 			<div className='flex-1 overflow-hidden'>
 				<div className='flex h-full'>
-					{breakpt == 'md' && (
+					{breakPt == 'md' && (
 						<div className='w-72 h-full px-3 overflow-y-auto'>
 							<Sidebar directoryId={directoryId} />
 						</div>

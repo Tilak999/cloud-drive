@@ -82,6 +82,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
 						<FileListHeader
 							title={data.name}
 							fileCount={data.files.length}
+							isLoading={isLoading}
 							selection={selection}
 							folderId={folderId}
 							onRefresh={reset}
@@ -95,6 +96,7 @@ export default function FileList({ folderId, onDirectoryChange }) {
 					<FileListHeader
 						title={data.name}
 						fileCount={data.files.length}
+						isLoading={isLoading}
 						selection={selection}
 						folderId={folderId}
 						onRefresh={reset}

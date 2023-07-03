@@ -1,5 +1,6 @@
 import {
 	Box,
+	Button,
 	Flex,
 	Heading,
 	HStack,
@@ -21,6 +22,7 @@ import If from './If';
 export default function FileListHeader({
 	title,
 	fileCount,
+	isLoading,
 	selection,
 	folderId,
 	onRefresh,
@@ -36,7 +38,7 @@ export default function FileListHeader({
 					<Heading
 						size='md'
 						maxW='xl'
-						className='whitespace-nowrap overflow-hidden text-ellipsis'
+						className='whitespace-nowrap overflow-hidden text-ellipsis flex items-center'
 					>
 						<If condition={folderId != 'root'}>
 							<IconButton
@@ -50,6 +52,11 @@ export default function FileListHeader({
 						<Tooltip label={title} hasArrow color='gray.300' bg='gray.900'>
 							{title}
 						</Tooltip>
+						<If condition={fileCount > 0}>
+							<Button isLoading={isLoading} size='xs' className='ml-4 p-2'>
+								{fileCount} items
+							</Button>
+						</If>
 					</Heading>
 				</Box>
 				<Spacer />
@@ -68,11 +75,7 @@ export default function FileListHeader({
 							/>
 						</If>
 					</If>
-					<If condition={fileCount.length}>
-						<Tooltip label={fileCount} hasArrow color='gray.300' bg='gray.900'>
-							Files: {fileCount}
-						</Tooltip>
-					</If>
+
 					<If condition={selection.length == 1}>
 						<RenameBtn file={selection[0]} onRefresh={onRefresh} iconOnly={iconOnly} />
 					</If>

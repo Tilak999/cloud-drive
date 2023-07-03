@@ -1,4 +1,5 @@
 import axios from 'axios';
+import _ from 'lodash';
 
 interface currentFileProgress {
 	loaded: number;
@@ -33,7 +34,7 @@ export function getTransferQueueStatus() {
 	};
 }
 
-export default async function uploadFile(item) {
+const uploadFile = async (item) => {
 	upload_queue.push({
 		name: item.file.name,
 		loaded: 0,
@@ -52,7 +53,9 @@ export default async function uploadFile(item) {
 				console.log(error);
 			});
 	}
-}
+};
+
+export default uploadFile;
 
 async function performUploads() {
 	while (upload_queue.length > 0) {
@@ -65,7 +68,8 @@ async function performUploads() {
 		await axios
 			.post('/api/uploadFiles', formdata, {
 				onUploadProgress: (progress) => {
-					const percentage = (progress.loaded / progress.total) * 100;
+					console.log('uploading', progress);
+					const percentage = _.round((progress.loaded / progress.total) * 100, 2);
 					current_active = {
 						loaded: progress.loaded,
 						total: progress.total,
@@ -80,8 +84,8 @@ async function performUploads() {
 				completed.push(current_active);
 				current_active = null;
 			})
-			.catch(function (error) {
-				onUpdate(current_active);
+			.catch((error) => {
+				_onUpdate(current_active);
 				failed.push(current_active);
 				current_active = null;
 			});

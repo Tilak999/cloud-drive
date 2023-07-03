@@ -1,12 +1,17 @@
 {
-    "prettier.tabWidth": 4,
-    "prettier.printWidth": 100,
-    "editor.formatOnSave": true,
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": true
-    },
-    "cSpell.words": [
-        "chakra"
-    ]
+	"prettier.tabWidth": 4,
+	"prettier.printWidth": 100,
+	"editor.formatOnSave": true,
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": true
+	},
+	"tailwindCSS.includeLanguages": {
+		"javascript": "javascript",
+		"html": "HTML"
+	},
+	"editor.quickSuggestions": {
+		"strings": true
+	},
+	"cSpell.words": ["chakra"]
 }

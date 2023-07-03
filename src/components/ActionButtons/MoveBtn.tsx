@@ -17,6 +17,7 @@ import {
 	useDisclosure
 } from '@chakra-ui/react';
 import axios from 'axios';
+import _ from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GoFileDirectory } from 'react-icons/go';
 
@@ -68,8 +69,11 @@ export default function MoveBtn({ selection, onRefresh, iconOnly }) {
 			if (isLoading) return;
 			setLoading(true);
 			const { data } = await axios.post('/api/listFiles', { folderId });
-			const selectedIds = selection.map((f) => f.id);
-			data.files = data.files.filter((f) => !selectedIds.includes(f.id));
+			const selectedIds = _.map(selection, (file) => file.id);
+			data.files = _.filter(
+				data.files,
+				(file) => !_.includes(selectedIds, file.id) && file.mimeType.endsWith('folder')
+			);
 			setData(data);
 			setLoading(false);
 		},
@@ -88,8 +92,10 @@ export default function MoveBtn({ selection, onRefresh, iconOnly }) {
 	};
 
 	useEffect(() => {
-		loadFiles('root');
-	}, [isOpen, loadFiles]);
+		if (!data.id) {
+			loadFiles('root');
+		}
+	}, [isOpen, loadFiles, data, setLoading]);
 
 	return (
 		<>

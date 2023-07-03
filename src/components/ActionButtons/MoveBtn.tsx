@@ -17,7 +17,7 @@ import {
 	useDisclosure
 } from '@chakra-ui/react';
 import axios from 'axios';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { GoFileDirectory } from 'react-icons/go';
 
 function FileList({ data, onSelect }) {
@@ -63,15 +63,18 @@ export default function MoveBtn({ selection, onRefresh, iconOnly }) {
 	const [isLoading, setLoading] = useState(false);
 	const [data, setData] = useState({ id: '', files: [], name: '' });
 
-	const loadFiles = async (folderId) => {
-		if (isLoading) return;
-		setLoading(true);
-		const { data } = await axios.post('/api/listFiles', { folderId });
-		const selectedIds = selection.map((f) => f.id);
-		data.files = data.files.filter((f) => !selectedIds.includes(f.id));
-		setData(data);
-		setLoading(false);
-	};
+	const loadFiles = useCallback(
+		async (folderId) => {
+			if (isLoading) return;
+			setLoading(true);
+			const { data } = await axios.post('/api/listFiles', { folderId });
+			const selectedIds = selection.map((f) => f.id);
+			data.files = data.files.filter((f) => !selectedIds.includes(f.id));
+			setData(data);
+			setLoading(false);
+		},
+		[isLoading, selection]
+	);
 
 	const move = async () => {
 		setLoading(true);
@@ -85,8 +88,8 @@ export default function MoveBtn({ selection, onRefresh, iconOnly }) {
 	};
 
 	useEffect(() => {
-		this.loadFiles('root');
-	}, [isOpen]);
+		loadFiles('root');
+	}, [isOpen, loadFiles]);
 
 	return (
 		<>

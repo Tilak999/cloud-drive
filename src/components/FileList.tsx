@@ -15,7 +15,7 @@ import { onUpdate } from '@lib/uploadHandler';
 import { formatDate, humanFileSize } from '@lib/utils';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import FileIcon from './FileIcons';
 import FileListHeader from './FileListHeader';
 import If from './If';
@@ -27,16 +27,6 @@ export default function FileList({ folderId, onDirectoryChange }) {
 	const router = useRouter();
 	const breakPt = useBreakpointValue({ base: 'base', md: 'md' });
 
-	useEffect(() => {
-		setSelection([]);
-		this.loadFiles(folderId);
-		onUpdate((lastCompleted) => {
-			if (lastCompleted.directoryId == folderId) {
-				this.loadFiles(folderId, true);
-			}
-		});
-	}, [folderId]);
-
 	const selectAll = (e) => {
 		if (e.target.checked) {
 			setSelection(data.files);
@@ -45,13 +35,16 @@ export default function FileList({ folderId, onDirectoryChange }) {
 		}
 	};
 
-	const loadFiles = async (folderId, silent = false) => {
-		if (!silent) setLoading(true);
-		onDirectoryChange(folderId);
-		const { data } = await axios.post('/api/listFiles', { folderId });
-		setData(data);
-		setLoading(false);
-	};
+	const loadFiles = useCallback(
+		async (folderId, silent = false) => {
+			if (!silent) setLoading(true);
+			onDirectoryChange(folderId);
+			const { data } = await axios.post('/api/listFiles', { folderId });
+			setData(data);
+			setLoading(false);
+		},
+		[onDirectoryChange]
+	);
 
 	const checkbox = (e, f) => {
 		if (e.target.checked) {
@@ -70,6 +63,16 @@ export default function FileList({ folderId, onDirectoryChange }) {
 		if (file.mimeType.includes('folder')) router.push('/dashboard?id=' + file.id);
 		else window.location.href = '/api/download?id=' + file.id;
 	};
+
+	useEffect(() => {
+		setSelection([]);
+		loadFiles(folderId);
+		onUpdate((lastCompleted) => {
+			if (lastCompleted.directoryId == folderId) {
+				loadFiles(folderId, true);
+			}
+		});
+	}, [folderId, loadFiles]);
 
 	return (
 		<>

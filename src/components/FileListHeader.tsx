@@ -68,11 +68,11 @@ export default function FileListHeader({
 							/>
 						</If>
 					</If>
-					{/* <If condition={fileCount.length}>
+					<If condition={fileCount.length}>
 						<Tooltip label={fileCount} hasArrow color='gray.300' bg='gray.900'>
 							Files: {fileCount}
 						</Tooltip>
-					</If> */}
+					</If>
 					<If condition={selection.length == 1}>
 						<RenameBtn file={selection[0]} onRefresh={onRefresh} iconOnly={iconOnly} />
 					</If>

@@ -11,7 +11,12 @@ import {
 	Progress,
 	Text
 } from '@chakra-ui/react';
-import { clearCompleted, getTransferQueueStatus, removeFromQueue } from '@lib/uploadHandler';
+import {
+	clearCompleted,
+	clearFailed,
+	getTransferQueueStatus,
+	removeFromQueue
+} from '@lib/uploadHandler';
 import { humanFileSize } from '@lib/utils';
 import { useRef, useState } from 'react';
 
@@ -21,17 +26,19 @@ export default function ViewDetailsBtn() {
 	const [progress, setProgress] = useState<any>({
 		active: null,
 		queue: [],
-		completed: []
+		completed: [],
+		failed: []
 	});
 
 	const onModalOpen = () => {
 		setOpen(true);
 		intervalRef.current = setInterval(() => {
-			const { upload_queue, completed, current_active } = getTransferQueueStatus();
+			const { upload_queue, completed, current_active, failed } = getTransferQueueStatus();
 			setProgress({
 				active: current_active,
 				queue: upload_queue,
-				completed: completed
+				completed: completed,
+				failed: failed
 			});
 		}, 1000);
 	};
@@ -137,6 +144,39 @@ export default function ViewDetailsBtn() {
 								</div>
 							))}
 							{progress.completed.length == 0 && (
+								<div className='p-2 border rounded my-4 text-center text-gray-500'>
+									No recent uploads
+								</div>
+							)}
+						</div>
+						<div className='my-2 cursor-default'>
+							<Heading
+								size='sm'
+								className='flex justify-between'
+								color={'gray.400'}
+								mb='2'
+							>
+								Failed ({progress.failed.length})
+								{progress.failed.length > 0 && (
+									<Button
+										variant={'link'}
+										color='gray.500'
+										className='hover:text-red-400 mr-2'
+										size={'sm'}
+										onClick={clearFailed}
+									>
+										Clear failed
+									</Button>
+								)}
+							</Heading>
+							{progress.failed.map((item) => (
+								<div key={item.directoryId} className='p-1'>
+									<Text my='1' color='gray.300' size='sm'>
+										{item.name}
+									</Text>
+								</div>
+							))}
+							{progress.failed.length == 0 && (
 								<div className='p-2 border rounded my-4 text-center text-gray-500'>
 									No recent uploads
 								</div>

@@ -59,15 +59,15 @@ apiRoute.post(async (req: NextApiRequestWithFile, res: NextApiResponse) => {
 					progress: (e) => {},
 					parentId: destFolderId
 				});
-			} catch (e) {
-				console.error(e);
+			} catch (error) {
+				console.error(error);
 			}
-			fs.rm(filepath, () => console.log('file removed'));
-			console.log(`File uploaded to gdrive: ${file.filename}`);
+			fs.rm(filepath, () => console.log('File removed'));
+			console.log(`File uploaded to gDrive: ${file.filename}`);
 		}
 		res.status(200).json(req.files);
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		console.error(error);
 		res.status(500);
 	}
 });

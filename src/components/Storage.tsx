@@ -31,6 +31,14 @@ export default function Storage() {
 			const percentage = (data.usage / data.limit) * 100;
 			const loading = false;
 			setStorage({ limit, usage, free, percentage, loading });
+		}).catch((error) => {
+			setStorage({
+				limit: '~',
+				usage: '~',
+				free: '~',
+				percentage: 0,
+				loading: false
+			});
 		});
 	}, []);
 

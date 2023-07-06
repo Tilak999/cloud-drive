@@ -16,7 +16,7 @@ interface uploadFileObject extends currentFileProgress {
 let upload_queue: uploadFileObject[] = [];
 let current_active: currentFileProgress;
 let completed: currentFileProgress[] = [];
-let failed: currentFileProgress[] = [];
+let failed: uploadFileObject[] = [];
 
 let _onUpdate = console.log;
 let isRunning = false;
@@ -59,7 +59,8 @@ export default uploadFile;
 
 async function performUploads() {
 	while (upload_queue.length > 0) {
-		const { file, directoryId } = upload_queue.shift();
+		const item = upload_queue.shift()
+		const { file, directoryId } = item;
 		const relativePath = file.webkitRelativePath;
 		const formdata = new FormData();
 		formdata.set('files', file);
@@ -86,7 +87,7 @@ async function performUploads() {
 			})
 			.catch((error) => {
 				_onUpdate(current_active);
-				failed.push(current_active);
+				failed.push(item);
 				current_active = null;
 			});
 	}
@@ -106,6 +107,9 @@ export function clearFailed() {
 	failed = [];
 }
 
-export function retryUpload(item) {
-	console.log(`Retry: ${item.name}`);
+export function retryUpload(item: uploadFileObject) {
+	failed = failed.filter(
+		(file) => !(file.name === item.name && file.directoryId === item.directoryId)
+	);
+	uploadFile(item)
 }

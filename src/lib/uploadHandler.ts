@@ -105,3 +105,7 @@ export function clearCompleted() {
 export function clearFailed() {
 	failed = [];
 }
+
+export function retryUpload(item) {
+	console.log(`Retry: ${item.name}`);
+}

@@ -11,11 +11,13 @@ import {
 	Progress,
 	Text
 } from '@chakra-ui/react';
+import If from '@components/If';
 import {
 	clearCompleted,
 	clearFailed,
 	getTransferQueueStatus,
-	removeFromQueue
+	removeFromQueue,
+	retryUpload
 } from '@lib/uploadHandler';
 import { humanFileSize } from '@lib/utils';
 import { useRef, useState } from 'react';
@@ -116,15 +118,15 @@ export default function ViewDetailsBtn() {
 								</div>
 							)}
 						</div>
-						<div className='my-2 cursor-default'>
-							<Heading
-								size='sm'
-								className='flex justify-between'
-								color={'gray.400'}
-								mb='2'
-							>
-								Uploaded ({progress.completed.length})
-								{progress.completed.length > 0 && (
+						<If condition={progress.completed.length > 0}>
+							<div className='my-2 cursor-default'>
+								<Heading
+									size='sm'
+									className='flex justify-between'
+									color={'gray.400'}
+									mb='2'
+								>
+									Uploaded ({progress.completed.length})
 									<Button
 										variant={'link'}
 										color='gray.500'
@@ -134,30 +136,31 @@ export default function ViewDetailsBtn() {
 									>
 										Clear completed
 									</Button>
+								</Heading>
+								{progress.completed.map((item) => (
+									<div key={item.directoryId} className='p-1'>
+										<Text my='1' color='gray.300' size='sm'>
+											{item.name}
+										</Text>
+									</div>
+								))}
+								{progress.completed.length == 0 && (
+									<div className='p-2 border rounded my-4 text-center text-gray-500'>
+										No recent uploads
+									</div>
 								)}
-							</Heading>
-							{progress.completed.map((item) => (
-								<div key={item.directoryId} className='p-1'>
-									<Text my='1' color='gray.300' size='sm'>
-										{item.name}
-									</Text>
-								</div>
-							))}
-							{progress.completed.length == 0 && (
-								<div className='p-2 border rounded my-4 text-center text-gray-500'>
-									No recent uploads
-								</div>
-							)}
-						</div>
-						<div className='my-2 cursor-default'>
-							<Heading
-								size='sm'
-								className='flex justify-between'
-								color={'gray.400'}
-								mb='2'
-							>
-								Failed ({progress.failed.length})
-								{progress.failed.length > 0 && (
+							</div>
+						</If>
+
+						<If condition={progress.failed.length > 0}>
+							<div className='my-2 cursor-default'>
+								<Heading
+									size='sm'
+									className='flex justify-between'
+									color={'gray.400'}
+									mb='2'
+								>
+									Failed ({progress.failed.length})
 									<Button
 										variant={'link'}
 										color='gray.500'
@@ -167,21 +170,33 @@ export default function ViewDetailsBtn() {
 									>
 										Clear failed
 									</Button>
+								</Heading>
+								{progress.failed.map((item) => (
+									<div
+										key={item.directoryId}
+										className='m-1 flex justify-between'
+									>
+										<Text my='1' color='gray.300' size='sm'>
+											{item.name}
+										</Text>
+										<Button
+											variant={'link'}
+											color='gray.500'
+											className='hover:text-white'
+											size={'sm'}
+											onClick={() => retryUpload(item)}
+										>
+											Retry
+										</Button>
+									</div>
+								))}
+								{progress.failed.length == 0 && (
+									<div className='p-2 border rounded my-4 text-center text-gray-500'>
+										No recent uploads
+									</div>
 								)}
-							</Heading>
-							{progress.failed.map((item) => (
-								<div key={item.directoryId} className='p-1'>
-									<Text my='1' color='gray.300' size='sm'>
-										{item.name}
-									</Text>
-								</div>
-							))}
-							{progress.failed.length == 0 && (
-								<div className='p-2 border rounded my-4 text-center text-gray-500'>
-									No recent uploads
-								</div>
-							)}
-						</div>
+							</div>
+						</If>
 					</AlertDialogBody>
 					<AlertDialogFooter>
 						<Button onClick={onModalClose}>Close</Button>

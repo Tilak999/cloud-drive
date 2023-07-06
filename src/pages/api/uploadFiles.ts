@@ -14,26 +14,30 @@ const handler = async (req, res) => {
 			keepExtensions: true
 		});
 		const gfs = await getGFS(getToken(req, res));
+		let filePath = ''
 		try {
 			await form.parse(req, async (err, fields, files) => {
 				const file = files.files[0]
 				const { directoryId, relativePath } = fields;
 				const destFolderId = await getOrCreateDirectories(gfs, directoryId[0], relativePath[0]);
-				const filepath = file.filepath
+				filePath = file.filepath
 				console.log(`Uploading.. ${file.originalFilename}`);
-				await gfs.uploadFile(fs.createReadStream(file.filepath), {
+				await gfs.uploadFile(fs.createReadStream(filePath), {
 					name: file.originalFilename,
 					size: file.size,
 					progress: (e) => { },
 					parentId: destFolderId
 				});
-				fs.rm(filepath, () => console.log('File removed'));
+				fs.rm(filePath, () => console.log('File removed'));
 				console.log(`File uploaded to gDrive: ${file.originalFilename}`);
 				res.status(200).json({});
 			});
 
 		} catch (error) {
 			console.error(error);
+			if (filePath !== '') {
+				fs.rm(filePath, () => console.log('File removed'));
+			}
 			res.status(500);
 			reject()
 		}

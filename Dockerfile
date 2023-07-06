@@ -8,7 +8,8 @@ COPY package.json /app/package.json
 COPY package-lock.json /app/package-lock.json
 RUN npm i
 
+RUN mkdir -p /app/public/uploads
 COPY . .
-RUN npm run build
 
+RUN npm run build
 CMD npm run start

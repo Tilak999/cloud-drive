@@ -3,13 +3,13 @@ import getGFS from '@lib/gdrive';
 import { getToken } from '@lib/utils';
 import formidable from 'formidable';
 import fs from 'fs';
+import _ from 'lodash';
 import path from 'path';
 
 const handler = async (req, res) => {
-
 	return new Promise<void>(async (resolve, reject) => {
 		const form = formidable({
-			uploadDir: './public/uploads',
+			uploadDir: '/app/public/uploads',
 			maxFileSize: 15 * 1024 * 1024 * 1024,
 			keepExtensions: true
 		});
@@ -17,7 +17,13 @@ const handler = async (req, res) => {
 		let filePath = ''
 		try {
 			await form.parse(req, async (err, fields, files) => {
-				const file = files.files[0]
+				const file = _.get(files, 'files[0]', null)
+				if (err || !file) {
+					console.error('Error reading files', err, files)
+					res.status(500);
+					reject()
+					return;
+				}
 				const { directoryId, relativePath } = fields;
 				const destFolderId = await getOrCreateDirectories(gfs, directoryId[0], relativePath[0]);
 				filePath = file.filepath

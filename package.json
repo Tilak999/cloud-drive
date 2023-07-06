@@ -21,6 +21,7 @@
 		"@ideabox/cloud-drive-fs": "^0.2.8",
 		"axios": "^1.4.0",
 		"cookies": "^0.8.0",
+		"formidable": "^3.5.0",
 		"framer-motion": "^10.12.18",
 		"lodash": "^4.17.21",
 		"multer": "^1.4.5-lts.1",

@@ -1,15 +1,30 @@
-FROM ubuntu:20.04
-FROM node:latest
+FROM ubuntu:20.04 
+ENV NODE_VERSION=18.16.1
 
-WORKDIR /app
+# Install system specific dependencies 
+RUN apt-get clean all 
+RUN apt-get update -y 
+RUN apt-get install -y curl 
+RUN apt-get install -y wget 
+RUN apt-get install -y git 
 
-COPY tsconfig.json /app/tsconfig.json
-COPY package.json /app/package.json
-COPY package-lock.json /app/package-lock.json
+#Install node and npm 
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+
+RUN mkdir -p /home/ubuntu/app
+WORKDIR /home/ubuntu/app
+
+ADD tsconfig.json tsconfig.json
+ADD package.json package.json
+ADD package-lock.json package-lock.json
 RUN npm i
 
-RUN mkdir -p /app/public/uploads
-COPY . .
-
+ADD . .
 RUN npm run build
+
 CMD npm run start

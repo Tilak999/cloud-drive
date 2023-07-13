@@ -9,7 +9,7 @@ import path from 'path';
 const handler = async (req, res) => {
 	return new Promise<void>(async (resolve, reject) => {
 		const form = formidable({
-			uploadDir: '/app/public/uploads',
+			uploadDir: 'cachedFiles',
 			maxFileSize: 15 * 1024 * 1024 * 1024,
 			keepExtensions: true
 		});

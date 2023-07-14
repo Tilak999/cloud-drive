@@ -60,8 +60,8 @@ export default function FileList({ folderId, onDirectoryChange }) {
 	};
 
 	const onFileClick = (file) => {
-		if (file.mimeType.includes('folder')) router.push('/dashboard?id=' + file.id);
-		else window.location.href = '/api/download?id=' + file.id;
+		if (file.mimeType.includes('folder')) router.push(`/dashboard?id=${file.id}`);
+		else window.location.href = `/api/download?id=${file.id}`;
 	};
 
 	useEffect(() => {

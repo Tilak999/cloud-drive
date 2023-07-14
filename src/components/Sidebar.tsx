@@ -32,7 +32,8 @@ export default function Sidebar({ directoryId }) {
 		isActive: false,
 		uploading: 0,
 		queue: 0,
-		completed: 0
+		completed: 0,
+		failed: 0
 	});
 
 	const onSelection = (e) => {
@@ -45,12 +46,13 @@ export default function Sidebar({ directoryId }) {
 	};
 
 	useInterval(() => {
-		const { upload_queue, completed, current_active } = getTransferQueueStatus();
+		const { upload_queue, completed, current_active, failed } = getTransferQueueStatus();
 		setProgress({
 			isActive: current_active != null,
 			uploading: current_active?.percentage || 0,
 			queue: upload_queue.length,
-			completed: completed.length
+			completed: completed.length,
+			failed: failed.length
 		});
 	}, 2000);
 

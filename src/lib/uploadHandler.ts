@@ -1,4 +1,5 @@
 import axios from 'axios';
+import _ from 'lodash';
 
 interface currentFileProgress {
 	loaded: number;
@@ -15,7 +16,7 @@ interface uploadFileObject extends currentFileProgress {
 let upload_queue: uploadFileObject[] = [];
 let current_active: currentFileProgress;
 let completed: currentFileProgress[] = [];
-let failed: currentFileProgress[] = [];
+let failed: uploadFileObject[] = [];
 
 let _onUpdate = console.log;
 let isRunning = false;
@@ -33,7 +34,7 @@ export function getTransferQueueStatus() {
 	};
 }
 
-export default async function uploadFile(item) {
+const uploadFile = async (item) => {
 	upload_queue.push({
 		name: item.file.name,
 		loaded: 0,
@@ -52,11 +53,14 @@ export default async function uploadFile(item) {
 				console.log(error);
 			});
 	}
-}
+};
+
+export default uploadFile;
 
 async function performUploads() {
 	while (upload_queue.length > 0) {
-		const { file, directoryId } = upload_queue.shift();
+		const item = upload_queue.shift()
+		const { file, directoryId } = item;
 		const relativePath = file.webkitRelativePath;
 		const formdata = new FormData();
 		formdata.set('files', file);
@@ -65,7 +69,8 @@ async function performUploads() {
 		await axios
 			.post('/api/uploadFiles', formdata, {
 				onUploadProgress: (progress) => {
-					const percentage = (progress.loaded / progress.total) * 100;
+					console.log('uploading', progress);
+					const percentage = _.round((progress.loaded / progress.total) * 100, 2);
 					current_active = {
 						loaded: progress.loaded,
 						total: progress.total,
@@ -80,9 +85,9 @@ async function performUploads() {
 				completed.push(current_active);
 				current_active = null;
 			})
-			.catch(function (error) {
-				onUpdate(current_active);
-				failed.push(current_active);
+			.catch((error) => {
+				_onUpdate(current_active);
+				failed.push(item);
 				current_active = null;
 			});
 	}
@@ -100,4 +105,11 @@ export function clearCompleted() {
 
 export function clearFailed() {
 	failed = [];
+}
+
+export function retryUpload(item: uploadFileObject) {
+	failed = failed.filter(
+		(file) => !(file.name === item.name && file.directoryId === item.directoryId)
+	);
+	uploadFile(item)
 }

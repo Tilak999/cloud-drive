@@ -5,8 +5,8 @@ import registerService from './registerService';
 const env: any = process.env;
 let password = env.DB_PASSWORD;
 
-if (env.DB_PASSWORD_FILE) {
-	password = fs.readFileSync(env.DB_PASSWORD_FILE, 'utf-8');
+if (process.env.DB_PASSWORD_FILE) {
+    password = fs.readFileSync(process.env.DB_PASSWORD_FILE, "utf-8").trim();
 }
 
 if (!password) {

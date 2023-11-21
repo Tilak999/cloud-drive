@@ -1,34 +1,34 @@
-import * as fs from 'fs';
-import { Pool } from 'pg';
-import registerService from './registerService';
+import * as fs from "fs";
+import { Pool } from "pg";
+import registerService from "./registerService";
 
 const env: any = process.env;
 let password = env.DB_PASSWORD;
 
-if (process.env.DB_PASSWORD_FILE) {
-    password = fs.readFileSync(process.env.DB_PASSWORD_FILE, "utf-8").trim();
+if (env.DB_PASSWORD_FILE) {
+    password = fs.readFileSync(env.DB_PASSWORD_FILE, "utf-8").trim();
 }
 
 if (!password) {
-	console.error(`Database Password Invalid: '${process.env.DB_PASSWORD}'`);
-	process.exit(1);
+    console.error(`Database Password Invalid: '${process.env.DB_PASSWORD}'`);
+    process.exit(1);
 }
 
-const pool = registerService('db', () => {
-	const pool = new Pool({
-		user: env.DB_USER,
-		database: env.DB_DATABASE,
-		password: env.DB_PASSWORD,
-		port: parseInt(env.DB_PORT || '5432'),
-		host: env.DB_HOST || 'db'
-	});
-	createTables(pool);
-	return pool;
+const pool = registerService("db", () => {
+    const pool = new Pool({
+        user: env.DB_USER,
+        database: env.DB_DATABASE,
+        password: env.DB_PASSWORD,
+        port: parseInt(env.DB_PORT || "5432"),
+        host: env.DB_HOST || "db",
+    });
+    createTables(pool);
+    return pool;
 });
 
-async function createTables(pool) {
-	await pool.connect();
-	await pool.query(`
+async function createTables(pool: Pool) {
+    await pool.connect();
+    await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
         id serial PRIMARY KEY,
         uuid TEXT NOT NULL UNIQUE,
@@ -39,7 +39,7 @@ async function createTables(pool) {
 }
 
 const exportObject = {
-	query: (text: any, params?: any) => pool.query(text, params)
+    query: (text: any, params?: any) => pool.query(text, params),
 };
 
 export default exportObject;

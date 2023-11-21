@@ -10,22 +10,22 @@ import {
     Text,
     useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { VscKey } from "react-icons/vsc";
 
 export default function Login() {
     const [isLoginForm, setLoginForm] = useState(true);
     const [isLoading, setLoading] = useState(false);
-    const [keyFile, setKeyFile] = useState({ name: null, text: null });
-    const fileInput = useRef(null);
+    const [keyFile, setKeyFile] = useState<{ name: String; text: String }>();
+    const fileInput = useRef<HTMLInputElement>(null);
     const toast = useToast();
     const router = useRouter();
 
     const parseKeyFile = async () => {
-        const files = fileInput.current.files;
-        if (files.length > 0) {
+        const files = fileInput.current?.files;
+        if (files && files.length > 0) {
             setKeyFile({
                 name: files[0].name,
                 text: await files[0].text(),
@@ -33,19 +33,20 @@ export default function Login() {
         }
     };
 
-    const validateInput = (e) => {
-        const email = e.target[0].value;
-        const password = e.target[1].value;
+    const validateInput = (e: FormEvent<HTMLFormElement>) => {
+        const email = (e.target as any)[0].value as String;
+        const password = (e.target as any)[1].value as String;
         if (email.trim() === "") throw "Email is empty";
         if (password.trim() === "") throw "Password is empty";
         if (!isLoginForm) {
+            const confirmPassword = (e.target as any)[2].value as String;
             if (!keyFile || !keyFile.name || !keyFile.text) throw "Invalid Key file selection";
-            if (e.target[2].value !== password) throw "Password fields don't match";
+            if (confirmPassword !== password) throw "Password fields don't match";
         }
         return { email, password, keyFile };
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         try {
@@ -57,14 +58,28 @@ export default function Login() {
                     router.push("/dashboard");
                 }
             } else {
-                const key = {
-                    contents: keyFile.text,
-                };
-                await axios.post("/api/signup", { email, password, key });
-                setLoading(false);
-                router.push("/dashboard");
+                if (keyFile && keyFile.text) {
+                    await axios.post("/api/signup", {
+                        email,
+                        password,
+                        key: {
+                            contents: keyFile.text,
+                        },
+                    });
+                    setLoading(false);
+                    router.push("/dashboard");
+                } else {
+                    toast({
+                        id: "authfail",
+                        title: "Invalid key file",
+                        status: "error",
+                        position: "top",
+                        duration: 1000,
+                        isClosable: true,
+                    });
+                }
             }
-        } catch (error) {
+        } catch (error: AxiosError | any) {
             setLoading(false);
             if (!toast.isActive("authfail"))
                 toast({
@@ -107,9 +122,9 @@ export default function Login() {
                             </FormControl>
                         )}
                         {!isLoginForm && (
-                            <Button w="full" onClick={() => fileInput.current.click()}>
+                            <Button w="full" onClick={() => fileInput.current?.click()}>
                                 <Icon as={VscKey} mr="2"></Icon>{" "}
-                                {keyFile.name || "Select Master Key"}
+                                {keyFile ? keyFile.name : "Select Master Key"}
                             </Button>
                         )}
                         <Button

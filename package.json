@@ -8,9 +8,9 @@
 	},
 	"scripts": {
 		"generateKey": "node ./tools/generateMasterKey.js",
-		"build": "next build ./src",
-		"dev": "next dev ./src",
-		"start": "next start ./src",
+		"build": "next build",
+		"dev": "next dev",
+		"start": "next start",
 		"lint": "next lint"
 	},
 	"author": "Tilak999",

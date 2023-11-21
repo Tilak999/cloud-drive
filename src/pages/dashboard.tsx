@@ -1,7 +1,7 @@
+import FileList from "@/components/FileList";
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import { useBreakpointValue } from "@chakra-ui/react";
-import FileList from "@components/FileList";
-import Header from "@components/Header";
-import Sidebar from "@components/Sidebar";
 import { useRouter } from "next/router";
 import { useState } from "react";
 

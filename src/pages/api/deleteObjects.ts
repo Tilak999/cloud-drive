@@ -1,7 +1,8 @@
-import getGFS from "@lib/gdrive";
-import { assertNotEmpty, getToken } from "@lib/utils";
+import getGFS from "@/lib/gdrive";
+import { assertNotEmpty, getToken } from "@/lib/utils";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function deleteObjects(req, res) {
+export default async function deleteObjects(req: NextApiRequest, res: NextApiResponse) {
     try {
         const gfs = await getGFS(getToken(req, res));
         for (const id of req.body.ids) {

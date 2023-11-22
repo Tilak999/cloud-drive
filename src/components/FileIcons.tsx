@@ -1,15 +1,22 @@
 import { Icon } from "@chakra-ui/react";
-import { FaFileVideo, FaFileAudio, FaFileImage, FaFileArchive, FaFilePdf, FaMicrochip } from "react-icons/fa";
+import {
+    FaFileArchive,
+    FaFileAudio,
+    FaFileImage,
+    FaFilePdf,
+    FaFileVideo,
+    FaMicrochip,
+} from "react-icons/fa";
 import { GoFile, GoFileDirectory } from "react-icons/go";
 
-export default function FileIcon({ filename, mimeType }) {
-    const videoFileExts = ["mkv", 'mp4', 'avi', 'mov', 'flv'];
+export default function FileIcon({ filename, mimeType }: { filename: String; mimeType: String }) {
+    const videoFileExts = ["mkv", "mp4", "avi", "mov", "flv"];
     const audioFileExts = ["m4a", "flac", "wav", "mp3", "wma", "acc"];
-    const archiveFileExts = ['7z', 'zip', 'bz2', 'tar', 'rar', 'deb'];
-    const appFileExts = ['apk', 'ipa']
-    const pdfFileExts = ['pdf']
-    const imageFileExts = ['jpeg', 'png', 'svg', 'gif', 'avif'];
-   
+    const archiveFileExts = ["7z", "zip", "bz2", "tar", "rar", "deb"];
+    const appFileExts = ["apk", "ipa"];
+    const pdfFileExts = ["pdf"];
+    const imageFileExts = ["jpeg", "png", "svg", "gif", "avif"];
+
     const chunks = filename.split(".");
     const ext = chunks[chunks.length - 1].toLowerCase();
 

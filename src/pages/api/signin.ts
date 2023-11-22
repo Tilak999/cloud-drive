@@ -1,8 +1,9 @@
-import db from "@lib/db";
-import { calcHash } from "@lib/utils";
+import db from "@/lib/db";
+import { calcHash } from "@/lib/utils";
 import Cookies from "cookies";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function signin(req, res) {
+export default async function signin(req: NextApiRequest, res: NextApiResponse) {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).send("bad request");
 

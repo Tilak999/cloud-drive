@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 export default function Dashboard() {
-    const [directoryId, setDirectoryId] = useState();
+    const [directoryId, setDirectoryId] = useState<string>("");
     const router = useRouter();
     const breakPt = useBreakpointValue({ base: "base", md: "md" });
 
@@ -24,7 +24,7 @@ export default function Dashboard() {
                     )}
                     <div className="flex flex-col flex-1 h-full overflow-hidden">
                         <FileList
-                            folderId={router.query.id || "root"}
+                            folderId={(router.query.id as string) || "root"}
                             onDirectoryChange={setDirectoryId}
                         />
                     </div>

@@ -1,17 +1,18 @@
-import getGFS from "@lib/gdrive";
-import { assertNotEmpty, getToken } from "@lib/utils";
+import getGFS from "@/lib/gdrive";
+import { assertNotEmpty, getToken } from "@/lib/utils";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function rename(req, res) {
+export default async function rename(req: NextApiRequest, res: NextApiResponse) {
     try {
         const gfs = await getGFS(getToken(req, res));
         const { id, name } = req.body;
         assertNotEmpty(id, "Id can't be empty");
         assertNotEmpty(name, "Id can't be empty");
         const item = await gfs.findById(id);
-        if (item && item.parents[0]) {
+        if (item && item.parents && item.parents[0]) {
             const list = await gfs.list(item.parents[0]);
             const matchedItems = list.files.filter(
-                (i) => i.name.toLowerCase() == name.toLowerCase() && i.id != id
+                (i) => i.name?.toLowerCase() == name.toLowerCase() && i.id != id
             );
             if (matchedItems.length > 0) {
                 return res.status(400).json({

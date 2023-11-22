@@ -11,18 +11,24 @@ import {
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRef, useState } from "react";
 import { FaFolderPlus } from "react-icons/fa";
 
-export default function NewFolderBtn({ currentFolderId, onRefresh, iconOnly }) {
+interface propType {
+    currentFolderId: string;
+    onRefresh: (data: any) => void;
+    iconOnly: boolean;
+}
+
+export default function NewFolderBtn({ currentFolderId, onRefresh, iconOnly }: propType) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isLoading, setLoading] = useState(false);
-    const input = useRef(null);
+    const input = useRef<HTMLInputElement>(null);
     const toast = useToast();
 
     const createFolder = async () => {
-        const value = input.current.value;
+        const value = input.current?.value;
         if (value != "") {
             setLoading(true);
             try {
@@ -32,7 +38,7 @@ export default function NewFolderBtn({ currentFolderId, onRefresh, iconOnly }) {
                 });
                 onRefresh(data);
                 onClose();
-            } catch (e) {
+            } catch (e: AxiosError | any) {
                 const exist = (e.response.data.message as string).includes("already exist");
                 toast({
                     title: exist ? "Folder with provided name already exist." : e,

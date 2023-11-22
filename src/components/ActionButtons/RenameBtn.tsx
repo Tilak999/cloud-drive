@@ -1,3 +1,4 @@
+import { File } from "@/types/file";
 import {
     Button,
     Input,
@@ -11,11 +12,17 @@ import {
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { BiRename } from "react-icons/bi";
 
-export default function RenameBtn({ file, onRefresh, iconOnly }) {
+interface propType {
+    file: File;
+    onRefresh: (data: any) => void;
+    iconOnly: boolean;
+}
+
+export default function RenameBtn({ file, onRefresh, iconOnly }: propType) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isLoading, setLoading] = useState(false);
     const [name, setName] = useState(file.name);
@@ -31,7 +38,7 @@ export default function RenameBtn({ file, onRefresh, iconOnly }) {
                 });
                 onClose();
                 onRefresh(data);
-            } catch (e) {
+            } catch (e: AxiosError | any) {
                 toast({
                     title: e.response.data.errorMsg,
                     isClosable: true,

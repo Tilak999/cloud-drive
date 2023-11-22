@@ -1,7 +1,8 @@
-import db from "@lib/db";
-import { calcHash, getToken } from "@lib/utils";
+import db from "@/lib/db";
+import { calcHash, getToken } from "@/lib/utils";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function updateAccount(req, res) {
+export default async function updateAccount(req: NextApiRequest, res: NextApiResponse) {
     const { email, current, newpassword, key } = req.body;
     const uuid = getToken(req, res);
 

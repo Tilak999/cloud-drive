@@ -1,7 +1,8 @@
+// @ts-nocheck
+import db from "@/lib/db";
 import GdriveFS from "@ideabox/cloud-drive-fs";
-import db from "@lib/db";
 
-export default async function getGFS(uuid) {
+export default async function getGFS(uuid: string) {
     if (uuid in global && global[uuid] != null) {
         return global[uuid] as GdriveFS;
     }

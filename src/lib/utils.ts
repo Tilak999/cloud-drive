@@ -1,7 +1,8 @@
-import crypto from "crypto";
 import Cookies from "cookies";
+import crypto from "crypto";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export function formatDate(dateStr) {
+export function formatDate(dateStr: string) {
     const date = new Date(dateStr);
     return (
         (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) +
@@ -31,15 +32,16 @@ export function calcHash(somestring: string) {
     return crypto.createHash("md5").update(somestring).digest("hex").toString();
 }
 
-export function getToken(req, res) {
+export function getToken(req: NextApiRequest, res: NextApiResponse) {
     const cookie = new Cookies(req, res);
-    if (cookie.get("token") === "") {
+    if (cookie.get("token") === "" || cookie.get("token") === null) {
         throw "UID token is missing..";
+    } else {
+        return cookie.get("token") || "";
     }
-    return cookie.get("token");
 }
 
-export function assertNotNull(param, message) {
+export function assertNotNull(param: any, message: string) {
     if (!param || param == null || typeof param === "undefined") {
         if (message) throw message;
         else return false;
@@ -47,7 +49,7 @@ export function assertNotNull(param, message) {
     return true;
 }
 
-export function assertNotEmpty(param, message = null) {
+export function assertNotEmpty(param: any, message?: string | null) {
     if (!param || param == null || typeof param === "undefined" || param.trim() === "") {
         if (message) throw message;
         else return false;

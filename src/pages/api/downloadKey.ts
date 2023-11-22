@@ -1,5 +1,5 @@
-import db from "@lib/db";
-import { getToken } from "@lib/utils";
+import db from "@/lib/db";
+import { getToken } from "@/lib/utils";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function downloadKey(req: NextApiRequest, res: NextApiResponse) {

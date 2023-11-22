@@ -1,7 +1,7 @@
 import Cookies from "cookies";
-import getGFS from "@lib/gdrive";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function cleanup(req, res) {
+export default async function cleanup(req: NextApiRequest, res: NextApiResponse) {
     const cookie = new Cookies(req, res);
     //const gfs = await getGFS(cookie.get("token"));
     //await gfs.cleanup();

@@ -1,3 +1,8 @@
-export default function If({ children, condition }) {
-	return condition && children;
+import React from "react";
+
+export default function If({
+    children,
+    condition,
+}: React.PropsWithChildren<{ condition: boolean | null | undefined }>) {
+    return condition && children;
 }

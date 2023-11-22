@@ -1,6 +1,7 @@
-import db from "@lib/db";
-import { calcHash } from "@lib/utils";
+import db from "@/lib/db";
+import { calcHash } from "@/lib/utils";
 import Cookies from "cookies";
+import { NextApiRequest, NextApiResponse } from "next";
 
 export const config = {
     api: {
@@ -11,7 +12,7 @@ export const config = {
     },
 };
 
-export default async function createMasterKey(req, res) {
+export default async function createMasterKey(req: NextApiRequest, res: NextApiResponse) {
     const { email, password, key } = req.body;
     if (!email || !password || !key || !key.contents) return res.status(400).send("bad request");
 

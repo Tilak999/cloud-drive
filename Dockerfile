@@ -18,7 +18,6 @@ ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
 RUN mkdir -p /home/ubuntu/app
 WORKDIR /home/ubuntu/app
-RUN mkdir -p cachedFiles
 
 ADD tsconfig.json tsconfig.json
 ADD package.json package.json

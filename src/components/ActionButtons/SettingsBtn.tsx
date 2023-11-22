@@ -15,8 +15,8 @@ import {
     useToast,
     VStack,
 } from "@chakra-ui/react";
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import axios, { AxiosError } from "axios";
+import React, { useEffect, useRef, useState } from "react";
 import { VscCloudUpload, VscFileCode, VscGear } from "react-icons/vsc";
 
 export default function SettingsBtn({}) {
@@ -26,11 +26,11 @@ export default function SettingsBtn({}) {
         newpassword: null,
         confirm: null,
     });
-    const cancelRef = useRef();
-    const fileInput = useRef(null);
+    const cancelRef = useRef<HTMLButtonElement>(null);
+    const fileInput = useRef<HTMLInputElement>(null);
     const toast = useToast();
 
-    const handleInput = (e) => {
+    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
         setForm({
             ...form,
@@ -47,9 +47,9 @@ export default function SettingsBtn({}) {
             });
         }
 
-        const files = fileInput.current.files;
+        const files = fileInput.current?.files;
         let file = null;
-        if (files.length > 0) {
+        if (files && files.length > 0) {
             file = {
                 name: files[0].name,
                 text: await files[0].text(),
@@ -61,7 +61,7 @@ export default function SettingsBtn({}) {
             const { data } = await axios.post("/api/updateAccount", { ...form, key: file });
             toast({ title: data.message, status: "success", position: "top" });
             onClose();
-        } catch (e) {
+        } catch (e: AxiosError | any) {
             toast({ title: e.response.data, status: "error", position: "top" });
         } finally {
             setLoading.off();
@@ -149,7 +149,7 @@ export default function SettingsBtn({}) {
                                 <Button
                                     leftIcon={<VscCloudUpload />}
                                     variant={"outline"}
-                                    onClick={() => fileInput.current.click()}
+                                    onClick={() => fileInput.current?.click()}
                                     className="flex-grow"
                                 >
                                     Update Key File

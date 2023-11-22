@@ -1,7 +1,8 @@
-import db from "@lib/db";
-import { getToken } from "@lib/utils";
+import db from "@/lib/db";
+import { getToken } from "@/lib/utils";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function getLoggedInUser(req, res) {
+export default async function getLoggedInUser(req: NextApiRequest, res: NextApiResponse) {
     const uuid = getToken(req, res);
     let query = await db.query(`Select * From users Where uuid=$1`, [uuid]);
     if (query.rowCount > 0) {

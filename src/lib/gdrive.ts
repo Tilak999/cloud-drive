@@ -10,7 +10,7 @@ global.session = new Map();
 export default async function getGFS(uuid: string) {
     const userSession = global.session.get(uuid);
     if (userSession) {
-        return userSession.val;
+        return userSession as GdriveFS;
     } else {
         const user = await prisma.users.findFirst({
             select: { key: true },

@@ -1,4 +1,4 @@
-import db from "@/lib/db";
+import prisma from "@/lib/prisma";
 import { calcHash } from "@/lib/utils";
 import Cookies from "cookies";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -8,16 +8,19 @@ export default async function signin(req: NextApiRequest, res: NextApiResponse) 
     if (!email || !password) return res.status(400).send("bad request");
 
     const passwordHash = calcHash(password);
-    let query = await db.query(`Select * From users Where email=$1 and password=$2`, [
-        email,
-        passwordHash,
-    ]);
-    if (query.rowCount > 0) {
+    let user = await prisma.users.findFirst({
+        select: { uuid: true, email: true },
+        where: {
+            email: email,
+            password: passwordHash,
+        },
+    });
+    if (user) {
         const cookies = new Cookies(req, res);
-        cookies.set("token", query.rows[0].uuid, {
+        cookies.set("token", user.uuid, {
             sameSite: true,
         });
-        return res.status(200).send(query.rows[0]);
+        return res.status(200).send(user);
     }
     return res.status(401).send("Authentication failed");
 }

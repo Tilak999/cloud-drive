@@ -1,7 +1,7 @@
-import getGFS from '@/lib/gdrive';
-import { getToken } from '@/lib/utils';
-import _ from 'lodash';
-import { NextApiRequest, NextApiResponse } from 'next';
+import getGFS from "@/lib/gdrive";
+import { getToken } from "@/lib/utils";
+import _ from "lodash";
+import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function listFiles(req: NextApiRequest, res: NextApiResponse) {
     const gfs = await getGFS(getToken(req, res));
@@ -9,13 +9,6 @@ export default async function listFiles(req: NextApiRequest, res: NextApiRespons
         console.log("-> Fetching root contents");
         const data = await gfs.list();
         const files = data.files;
-        // if (data.nextPageToken) {
-        //     let nextPageData: any = {};
-        //     do {
-        //         nextPageData = await gfs.list(data.nextPageToken);
-        //         files.push(...nextPageData.files);
-        //     } while (nextPageData.nextPageToken)
-        // }
         res.status(200).json({ id: "root", name: "Home", parents: null, files: files });
     } else {
         console.log("-> Fetching contents for: ", req.body.folderId);

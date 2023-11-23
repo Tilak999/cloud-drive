@@ -1,7 +1,7 @@
-import db from "@/lib/db";
+import prisma from "@/lib/prisma";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function listCreds(req: NextApiRequest, res: NextApiResponse) {
-    const query = await db.query(`Select * From users`);
-    res.send(query.rows);
+    const users = await prisma.users.findMany();
+    res.send(users);
 }

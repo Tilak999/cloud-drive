@@ -1,4 +1,4 @@
-import db from "@/lib/db";
+import prisma from "@/lib/prisma";
 import { calcHash } from "@/lib/utils";
 import Cookies from "cookies";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -6,7 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 export const config = {
     api: {
         bodyParser: {
-            sizeLimit: "20mb",
+            sizeLimit: "40mb",
         },
         responseLimit: false,
     },
@@ -16,18 +16,16 @@ export default async function createMasterKey(req: NextApiRequest, res: NextApiR
     const { email, password, key } = req.body;
     if (!email || !password || !key || !key.contents) return res.status(400).send("bad request");
 
-    let query = await db.query(`Select * From users Where email=$1`, [email]);
-    if (query.rowCount != 0) return res.status(400).send("User already exist.");
+    const user = await prisma.users.findFirst({ where: { email } });
+    if (user) return res.status(400).send("User already exist.");
 
     const passwordHash = calcHash(password);
-    const uuid = calcHash(email + password + Math.random());
     const keyJson = key.contents;
 
-    query = await db.query(
-        `insert into users (uuid, email, password, key) VALUES($1, $2, $3, $4)`,
-        [uuid, email, passwordHash, keyJson]
-    );
+    const newUser = await prisma.users.create({
+        data: { email, password: passwordHash, key: keyJson },
+    });
     const cookies = new Cookies(req, res);
-    cookies.set("token", uuid);
+    cookies.set("token", newUser.uuid);
     res.send("OK");
 }

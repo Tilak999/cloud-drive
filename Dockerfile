@@ -11,5 +11,4 @@ RUN npm i
 ADD . .
 
 RUN npm run build
-RUN npm run prisma-migrate
 CMD npm run start

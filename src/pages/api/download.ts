@@ -8,10 +8,13 @@ export default async function downloadFile(req: NextApiRequest, res: NextApiResp
         assertNotEmpty(req.query.id, "File id can't be empty!");
         const result = await gfs.download(req.query.id as string);
         if (result) {
-            res.writeHead(200, {
-                ...(result.length && { "Content-Length": result.length }),
+            const headers = {
+                "Content-Length": result.length,
                 "Content-Disposition": `attachment; filename="${result.name}"`,
-            });
+                Connection: "keep-alive",
+                "Keep-Alive": "timeout=5",
+            };
+            res.writeHead(200, headers);
             result.data.pipe(res);
         } else {
             throw "File with given id not found";

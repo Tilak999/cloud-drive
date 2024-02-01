@@ -11,7 +11,7 @@
 		"prisma-migrate": "prisma migrate deploy",
 		"build": "next build",
 		"dev": "next dev",
-		"start": "prisma migrate deploy && next start",
+		"start": "prisma migrate deploy && prisma generate && next start",
 		"lint": "next lint"
 	},
 	"author": "Tilak999",

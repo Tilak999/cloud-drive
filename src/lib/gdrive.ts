@@ -19,8 +19,8 @@ export default async function getGFS(uuid: string) {
             },
         });
         if (!user) throw `user with uuid '${uuid}' not found`;
-        const drive = new GdriveFS({
-            key: user.key,
+                const drive = new GdriveFS({
+            key: JSON.parse(user.key),
             driveName: "gdrive-fs",
             debug: process.env.NODE_ENV != "production",
         });
